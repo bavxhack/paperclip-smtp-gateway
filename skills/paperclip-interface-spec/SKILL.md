@@ -16,6 +16,9 @@ Produce a precise, reusable interface specification for `paperclip-smtp-gateway`
    - Error cases/validation
 4. If anything is unclear, inspect implementation in `app/main.py`, `app/models.py`, `app/paperclip_client.py`.
 5. Do not make silent assumptions; mark unknown fields explicitly as “not specified”.
+6. For `/replies/poll`, always document both arrays in `RepliesPollResponse`:
+   - `items` = full matched mail history from polling
+   - `unseen_items` = unread subset for incremental processing/parsing
 
 ## Recommended output format
 - Section `API`

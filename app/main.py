@@ -57,8 +57,8 @@ def create_draft(payload: DraftCreateRequest) -> DraftCreateResponse:
 @app.post('/replies/poll', response_model=RepliesPollResponse)
 def poll_replies(payload: RepliesPollRequest = Body(default_factory=RepliesPollRequest)) -> RepliesPollResponse:
     try:
-        items = reply_reader.poll_replies(payload)
-        return RepliesPollResponse(processed=len(items), items=items)
+        items, unseen_items = reply_reader.poll_replies(payload)
+        return RepliesPollResponse(processed=len(items), items=items, unseen_items=unseen_items)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f'Reply polling failed: {exc}') from exc
 

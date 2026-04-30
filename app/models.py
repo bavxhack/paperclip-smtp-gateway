@@ -47,6 +47,7 @@ class RepliesPollResponse(BaseModel):
     status: Literal['ok'] = 'ok'
     processed: int
     items: list[ReplyItem]
+    unseen_items: list[ReplyItem] = Field(default_factory=list)
 
 
 class PaperclipWebhookPayload(BaseModel):

@@ -17,19 +17,25 @@ class ReplyReader:
         self.settings = settings
         self.imap_client = imap_client
 
-    def poll_replies(self, filters: RepliesPollRequest) -> list[ReplyItem]:
+    def poll_replies(self, filters: RepliesPollRequest) -> tuple[list[ReplyItem], list[ReplyItem]]:
         items: list[ReplyItem] = []
+        unseen_items: list[ReplyItem] = []
 
         with self.imap_client.connect() as client:
             status, _ = client.select(self.settings.IMAP_INBOX_FOLDER)
             if status != 'OK':
                 raise RuntimeError('Could not select inbox folder')
 
-            status, data = client.search(None, 'UNSEEN')
+            status, data = client.search(None, 'ALL')
+            if status != 'OK':
+                raise RuntimeError('Could not search messages')
+
+            status, unseen_data = client.search(None, 'UNSEEN')
             if status != 'OK':
                 raise RuntimeError('Could not search unread messages')
 
             ids = (data[0].split() if data and data[0] else [])[: self.settings.POLL_LIMIT]
+            unseen_ids = set((unseen_data[0].split() if unseen_data and unseen_data[0] else [])[: self.settings.POLL_LIMIT])
 
             for mail_id in ids:
                 status, msg_data = client.fetch(mail_id, '(RFC822)')
@@ -59,9 +65,15 @@ class ReplyReader:
 
                 if self._matches_filters(item, filters):
                     items.append(item)
+                    if mail_id in unseen_ids:
+                        unseen_items.append(item)
 
-        logger.info('Polled %s replies (no auto-reply/no auto-send).', len(items))
-        return items
+        logger.info(
+            'Polled %s replies including %s unread (no auto-reply/no auto-send).',
+            len(items),
+            len(unseen_items),
+        )
+        return items, unseen_items
 
     @staticmethod
     def _extract_text(msg: email.message.Message) -> str:
