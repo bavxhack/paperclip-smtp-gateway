@@ -1,0 +1,5 @@
+version: 1
+interface:
+  display_name: Paperclip Interface Spec
+  short_description: Exakte API- und Integrationsschnittstellen für paperclip-smtp-gateway.
+  default_prompt: Dokumentiere die Schnittstellen in diesem Repository präzise und strukturiert.
