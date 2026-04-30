@@ -1,69 +1,69 @@
 # paperclip-mail-agent
 
-Docker-basierter FastAPI-Service als sicheres Mail-Gateway zwischen Paperclip AI und ALL-INKL IMAP/SMTP bzw. Thunderbird-Drafts.
+Docker-based FastAPI service that acts as a secure mail gateway between Paperclip AI and ALL-INKL IMAP/SMTP (or Thunderbird drafts).
 
-## Zweck des Projekts
-- Betrieb **neben** Paperclip AI als dedizierter Mail-Agent.
-- Schreibt Drafts in den IMAP-Drafts-Ordner (z. B. für Thunderbird).
-- Liest eingehende Antworten über IMAP und stellt sie unbearbeitet für Paperclip AI bereit.
-- Unterstützt Threading (`Message-ID`, `In-Reply-To`, `References`, `Re:` Subject).
+## Project purpose
+- Runs **next to** Paperclip AI as a dedicated mail agent.
+- Writes drafts into the IMAP drafts folder (for example, for Thunderbird).
+- Reads incoming replies via IMAP and exposes them unmodified for Paperclip AI.
+- Supports threading (`Message-ID`, `In-Reply-To`, `References`, `Re:` subject).
 
-## Sicherheitsprinzip
-**Niemals automatisch senden.**
-- Kein SMTP-Sende-Endpoint.
-- Keine Versandlogik implementiert.
-- Antwortmails werden ausschließlich als Draft gespeichert.
-- Logging ist defensiv gehalten (keine Passwörter, keine kompletten sensitiven Inhalte).
+## Security principle
+**Never send automatically.**
+- No SMTP send endpoint.
+- No sending logic is implemented.
+- Reply emails are stored as drafts only.
+- Logging is defensive (no passwords, no full sensitive content).
 
-## API Endpoints
+## API endpoints
 - `GET /health`
 - `GET /imap/folders`
 - `POST /drafts/create`
 - `POST /replies/poll`
 - `POST /paperclip/webhook`
 
-## Setup mit Docker Compose
+## Setup with Docker Compose
 ```bash
 cp .env.example .env
-# .env mit echten Zugangsdaten befüllen
+# Fill .env with real credentials
 docker compose -f docker-compose.example.yml up -d
 ```
 
-## Environment Variables
-Siehe `.env.example`.
+## Environment variables
+See `.env.example`.
 
-Wichtige Variablen:
+Important variables:
 - `PAPERCLIP_BASE_URL`, `PAPERCLIP_API_KEY`
-- `IMAP_*` für Zugriff auf Inbox/Drafts
-- `DRY_RUN=true` für sichere Tests ohne Draft-Write
+- `IMAP_*` for inbox/drafts access
+- `DRY_RUN=true` for safe tests without writing drafts
 
-ALL-INKL Defaults:
+ALL-INKL defaults:
 - `IMAP_HOST=imap.kasserver.com`
 - `IMAP_PORT=993`
 - `SMTP_HOST=smtp.kasserver.com`
 - `SMTP_PORT=465`
 
-## ALL-INKL / Thunderbird Draft-Ordner finden
-1. `GET /imap/folders` aufrufen.
-2. Prüfen, wie der Drafts-Ordner tatsächlich heißt (`Drafts`, `Entwürfe`, o. ä.).
-3. Wert in `IMAP_DRAFTS_FOLDER` setzen.
+## Find the ALL-INKL / Thunderbird drafts folder
+1. Call `GET /imap/folders`.
+2. Check the actual drafts folder name (`Drafts`, `Entwürfe`, etc.).
+3. Set the value in `IMAP_DRAFTS_FOLDER`.
 
-## Beispiel: POST /drafts/create
+## Example: POST /drafts/create
 ```bash
 curl -X POST http://localhost:8088/drafts/create \
   -H "Content-Type: application/json" \
   -d '{
     "to": "lead@example.com",
-    "subject": "Kurze Frage",
-    "body_text": "Hallo ...",
-    "body_html": "<p>Hallo ...</p>",
+    "subject": "Quick question",
+    "body_text": "Hello ...",
+    "body_html": "<p>Hello ...</p>",
     "from_email": "me@example.com",
     "reply_to_message_id": null,
     "references": null
   }'
 ```
 
-Antwort:
+Response:
 ```json
 {
   "status": "created",
@@ -71,12 +71,12 @@ Antwort:
 }
 ```
 
-## Beispiel: POST /replies/poll
+## Example: POST /replies/poll
 ```bash
 curl -X POST http://localhost:8088/replies/poll
 ```
 
-Request-Body (optional Filter):
+Request body (optional filters):
 ```json
 {
   "message_id": "<abc@example.com>",
@@ -84,27 +84,27 @@ Request-Body (optional Filter):
 }
 ```
 
-Verhalten:
-- Liest ungelesene Antworten (`UNSEEN`) aus `IMAP_INBOX_FOLDER`.
-- Bewertet/klassifiziert **nicht** und erstellt **keine** Antwort automatisch.
-- Gibt Antwortdaten inkl. `message_id` zurück, damit Paperclip AI gezielt Verlaufsmails laden kann.
-- Alternativ Filter über `from_email` für alle passenden E-Mails.
-- Markiert nichts als gelöscht.
+Behavior:
+- Reads unread replies (`UNSEEN`) from `IMAP_INBOX_FOLDER`.
+- Does **not** evaluate/classify and does **not** auto-generate a reply.
+- Returns reply data including `message_id` so Paperclip AI can load thread history.
+- Optional filtering by `from_email` for all matching emails.
+- Does not mark anything as deleted.
 
-## Paperclip Agent Abstraktion
-- Wenn `PAPERCLIP_BASE_URL` gesetzt ist: externer Paperclip-Agent wird genutzt.
-- Wenn nicht: lokaler Dummy-Responder wird genutzt.
+## Paperclip agent abstraction
+- If `PAPERCLIP_BASE_URL` is set: use the external Paperclip agent.
+- If not set: use the local dummy responder.
 
-## GHCR Nutzung
-Image-Name:
+## GHCR usage
+Image name:
 `ghcr.io/<github_owner>/paperclip-mail-agent`
 
-Pull-Beispiel:
+Pull example:
 ```bash
 docker pull ghcr.io/<github_owner>/paperclip-mail-agent:latest
 ```
 
-Docker Compose mit fertigem GHCR-Image:
+Docker Compose with prebuilt GHCR image:
 ```yaml
 services:
   paperclip-mail-agent:
@@ -113,15 +113,15 @@ services:
     ports: ["8088:8088"]
 ```
 
-## GitHub Actions Release/Publish
+## GitHub Actions release/publish
 Workflow: `.github/workflows/docker-publish.yml`
-- läuft auf Push nach `main`
-- läuft auf Tags `v*.*.*`
-- baut/pusht nach GHCR
-- Tags: `latest` (main), `sha`, `semver`
+- runs on push to `main`
+- runs on tags `v*.*.*`
+- builds/pushes to GHCR
+- tags: `latest` (main), `sha`, `semver`
 
-## DSGVO / Cold Email / Human-in-the-loop
-- Dieser Service ist ein technisches Werkzeug für Draft-Automation.
-- Prüfen Sie datenschutzrechtliche, wettbewerbsrechtliche und Branchenvorgaben vor produktivem Einsatz.
-- Versandfreigabe sollte immer durch Menschen erfolgen (Human-in-the-loop).
-- **Keine Rechtsberatung.**
+## GDPR / cold email / human in the loop
+- This service is a technical tool for draft automation.
+- Verify data privacy, competition law, and industry requirements before production use.
+- Sending approval should always be done by a human (human in the loop).
+- **No legal advice.**

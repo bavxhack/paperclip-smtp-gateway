@@ -1,4 +1,4 @@
-# Schnittstellen-Spezifikation: paperclip-smtp-gateway
+# Interface Specification: paperclip-smtp-gateway
 
 ## 1) HTTP API Endpoints
 
@@ -7,9 +7,9 @@
   - `status`: Literal `"ok"`
 
 ### GET /imap/folders
-- Zweck: verfügbare IMAP-Ordner auflisten.
+- Purpose: list available IMAP folders.
 - Response 200:
-  - nicht in `app/models.py` typisiert; von Implementierung in `app/main.py` abhängig.
+  - not typed in `app/models.py`; depends on implementation in `app/main.py`.
 
 ### POST /drafts/create
 - Request (`DraftCreateRequest`):
@@ -47,29 +47,29 @@
   - `event`: `str`
   - `data`: `dict` (default `{}`)
 - Response:
-  - von Implementierung in `app/main.py` abhängig.
+  - depends on implementation in `app/main.py`.
 
-## 2) Standard-Fehlerobjekt
+## 2) Standard error object
 - `ErrorResponse`:
   - `detail`: `str`
 
-## 3) Integrationsvertrag Paperclip (Outbound)
+## 3) Paperclip integration contract (outbound)
 
-Wenn `PAPERCLIP_BASE_URL` gesetzt ist, nutzt der Dienst `PaperclipAgent`:
+If `PAPERCLIP_BASE_URL` is set, the service uses `PaperclipAgent`:
 
-- HTTP Request:
-  - Methode: `POST`
+- HTTP request:
+  - Method: `POST`
   - URL: `{PAPERCLIP_BASE_URL}/generate`
-  - Header: `Authorization: Bearer <PAPERCLIP_API_KEY>` (nur falls Key vorhanden)
-  - JSON Body:
+  - Header: `Authorization: Bearer <PAPERCLIP_API_KEY>` (only if API key exists)
+  - JSON body:
     - `text`: `str` (incoming_text)
 
-- Erwartete Response JSON:
-  - `body_text`: `str` (fallback: `""` wenn nicht vorhanden)
+- Expected response JSON:
+  - `body_text`: `str` (fallback: `""` if not present)
   - `body_html`: `str | null`
 
 - Timeout:
-  - Gesamt: 15.0s
+  - Total: 15.0s
   - Connect: 5.0s
 
-Wenn `PAPERCLIP_BASE_URL` **nicht** gesetzt ist, nutzt der Dienst `DummyResponder` mit lokal generiertem `body_text`.
+If `PAPERCLIP_BASE_URL` is **not** set, the service uses `DummyResponder` with locally generated `body_text`.

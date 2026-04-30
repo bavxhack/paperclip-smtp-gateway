@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 
-from fastapi import FastAPI, HTTPException
+from fastapi import Body, FastAPI, HTTPException
 
 from app.config import AppMetadata, get_settings
 from app.draft_writer import DraftWriter
@@ -55,7 +55,7 @@ def create_draft(payload: DraftCreateRequest) -> DraftCreateResponse:
 
 
 @app.post('/replies/poll', response_model=RepliesPollResponse)
-def poll_replies(payload: RepliesPollRequest) -> RepliesPollResponse:
+def poll_replies(payload: RepliesPollRequest = Body(default_factory=RepliesPollRequest)) -> RepliesPollResponse:
     try:
         items = reply_reader.poll_replies(payload)
         return RepliesPollResponse(processed=len(items), items=items)
