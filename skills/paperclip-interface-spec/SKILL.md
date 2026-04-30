@@ -1,30 +1,30 @@
 ---
 name: paperclip-interface-spec
-description: Erstelle, prüfe und dokumentiere exakte Schnittstellenbeschreibungen für das Repository paperclip-smtp-gateway (FastAPI Endpoints, Request/Response-Modelle, Integrationspunkte zu Paperclip). Verwende dieses Skill bei Aufgaben wie API-Dokumentation, Vertragstests, Client-Implementierungen oder Import eines Repo-basierten Skills in Paperclip.
+description: Create, validate, and document exact interface specifications for the paperclip-smtp-gateway repository (FastAPI endpoints, request/response models, and Paperclip integration points). Use this skill for API documentation, contract tests, client implementations, or importing a repo-based skill into Paperclip.
 ---
 
-# Ziel
-Erzeuge eine präzise, wiederverwendbare Schnittstellenbeschreibung für `paperclip-smtp-gateway` und halte sie konsistent mit dem Code.
+# Goal
+Produce a precise, reusable interface specification for `paperclip-smtp-gateway` and keep it consistent with the code.
 
-## Vorgehen
-1. Lies zuerst `references/interfaces.md`.
-2. Extrahiere die relevanten Schnittstellen (HTTP, Datenmodelle, Agent-Integration).
-3. Gib Spezifikationen immer in stabiler Form aus:
-   - Endpoint + Methode
-   - Request-Felder inkl. Typen und Constraints
-   - Response-Felder inkl. Typen
-   - Fehlerfälle/Validierung
-4. Bei Unklarheiten: Implementierung in `app/main.py`, `app/models.py`, `app/paperclip_client.py` prüfen.
-5. Keine stillen Annahmen treffen; unbekannte Felder explizit als „nicht spezifiziert“ markieren.
+## Workflow
+1. Read `references/interfaces.md` first.
+2. Extract relevant interfaces (HTTP, data models, agent integration).
+3. Always output specs in a stable format:
+   - Endpoint + method
+   - Request fields including types and constraints
+   - Response fields including types
+   - Error cases/validation
+4. If anything is unclear, inspect implementation in `app/main.py`, `app/models.py`, `app/paperclip_client.py`.
+5. Do not make silent assumptions; mark unknown fields explicitly as “not specified”.
 
-## Ausgabeformat (empfohlen)
-- Abschnitt `API`
-- Abschnitt `Modelle`
-- Abschnitt `Integrationsvertrag Paperclip`
-- Abschnitt `Offene Punkte`
+## Recommended output format
+- Section `API`
+- Section `Models`
+- Section `Paperclip integration contract`
+- Section `Open questions`
 
-## Import aus Repo
-Wenn ein Nutzer das Skill direkt aus einem Git-Repo importieren will:
-1. Verwende den Skill-Ordner `skills/paperclip-interface-spec` als Import-Pfad.
-2. Stelle sicher, dass mindestens `SKILL.md` vorhanden ist.
-3. Optional: `agents/openai.yaml` für UI-Metadaten verwenden.
+## Import from repository
+If a user wants to import this skill directly from a Git repository:
+1. Use the `skills/paperclip-interface-spec` folder as the import path.
+2. Ensure at least `SKILL.md` is present.
+3. Optionally use `agents/openai.yaml` for UI metadata.
