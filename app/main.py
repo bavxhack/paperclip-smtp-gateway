@@ -13,6 +13,7 @@ from app.models import (
     DraftCreateResponse,
     HealthResponse,
     PaperclipWebhookPayload,
+    RepliesPollRequest,
     RepliesPollResponse,
 )
 from app.paperclip_client import build_agent
@@ -27,7 +28,7 @@ app = FastAPI(title=metadata.name, version=metadata.version)
 
 imap_client = ImapClient(settings)
 draft_writer = DraftWriter(settings, imap_client)
-reply_reader = ReplyReader(settings, imap_client, draft_writer)
+reply_reader = ReplyReader(settings, imap_client)
 agent = build_agent(settings)
 
 
@@ -54,10 +55,10 @@ def create_draft(payload: DraftCreateRequest) -> DraftCreateResponse:
 
 
 @app.post('/replies/poll', response_model=RepliesPollResponse)
-def poll_replies() -> RepliesPollResponse:
+def poll_replies(payload: RepliesPollRequest) -> RepliesPollResponse:
     try:
-        items, created_drafts = reply_reader.poll_replies()
-        return RepliesPollResponse(processed=len(items), created_drafts=created_drafts, items=items)
+        items = reply_reader.poll_replies(payload)
+        return RepliesPollResponse(processed=len(items), items=items)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f'Reply polling failed: {exc}') from exc
 

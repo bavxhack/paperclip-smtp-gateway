@@ -5,7 +5,7 @@ Docker-basierter FastAPI-Service als sicheres Mail-Gateway zwischen Paperclip AI
 ## Zweck des Projekts
 - Betrieb **neben** Paperclip AI als dedizierter Mail-Agent.
 - Schreibt Drafts in den IMAP-Drafts-Ordner (z. B. für Thunderbird).
-- Liest eingehende Antworten über IMAP und klassifiziert grob.
+- Liest eingehende Antworten über IMAP und stellt sie unbearbeitet für Paperclip AI bereit.
 - Unterstützt Threading (`Message-ID`, `In-Reply-To`, `References`, `Re:` Subject).
 
 ## Sicherheitsprinzip
@@ -76,10 +76,19 @@ Antwort:
 curl -X POST http://localhost:8088/replies/poll
 ```
 
+Request-Body (optional Filter):
+```json
+{
+  "message_id": "<abc@example.com>",
+  "from_email": "lead@example.com"
+}
+```
+
 Verhalten:
 - Liest ungelesene Antworten (`UNSEEN`) aus `IMAP_INBOX_FOLDER`.
-- Klassifiziert in `interested`, `not_interested`, `unsubscribe`, `question`, `unclear`.
-- Erstellt Antwort-Drafts nur in sinnvollen Fällen (z. B. `interested`, `question`).
+- Bewertet/klassifiziert **nicht** und erstellt **keine** Antwort automatisch.
+- Gibt Antwortdaten inkl. `message_id` zurück, damit Paperclip AI gezielt Verlaufsmails laden kann.
+- Alternativ Filter über `from_email` für alle passenden E-Mails.
 - Markiert nichts als gelöscht.
 
 ## Paperclip Agent Abstraktion

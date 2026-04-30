@@ -28,19 +28,24 @@ class DraftCreateResponse(BaseModel):
     folder: str
 
 
+class RepliesPollRequest(BaseModel):
+    message_id: str | None = None
+    from_email: EmailStr | None = None
+
+
 class ReplyItem(BaseModel):
     message_id: str
     from_email: str
     subject: str
     snippet: str
-    classification: Literal['interested', 'not_interested', 'unsubscribe', 'question', 'unclear']
-    draft_created: bool = False
+    in_reply_to: str | None = None
+    references: str | None = None
+    received_at: str | None = None
 
 
 class RepliesPollResponse(BaseModel):
     status: Literal['ok'] = 'ok'
     processed: int
-    created_drafts: int
     items: list[ReplyItem]
 
 

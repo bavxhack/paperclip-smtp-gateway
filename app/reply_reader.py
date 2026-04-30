@@ -3,24 +3,22 @@ from __future__ import annotations
 import email
 import logging
 from email.header import decode_header, make_header
+from email.utils import parsedate_to_datetime
 
 from app.config import Settings
-from app.draft_writer import DraftWriter
 from app.imap_client import ImapClient
-from app.models import DraftCreateRequest, ReplyItem
+from app.models import ReplyItem, RepliesPollRequest
 
 logger = logging.getLogger(__name__)
 
 
 class ReplyReader:
-    def __init__(self, settings: Settings, imap_client: ImapClient, draft_writer: DraftWriter) -> None:
+    def __init__(self, settings: Settings, imap_client: ImapClient) -> None:
         self.settings = settings
         self.imap_client = imap_client
-        self.draft_writer = draft_writer
 
-    def poll_replies(self) -> tuple[list[ReplyItem], int]:
+    def poll_replies(self, filters: RepliesPollRequest) -> list[ReplyItem]:
         items: list[ReplyItem] = []
-        created_drafts = 0
 
         with self.imap_client.connect() as client:
             status, _ = client.select(self.settings.IMAP_INBOX_FOLDER)
@@ -37,40 +35,33 @@ class ReplyReader:
                 status, msg_data = client.fetch(mail_id, '(RFC822)')
                 if status != 'OK' or not msg_data:
                     continue
+
                 raw = msg_data[0][1]
                 msg = email.message_from_bytes(raw)
 
                 subject = str(make_header(decode_header(msg.get('Subject', ''))))
                 from_email = msg.get('From', '')
                 message_id = msg.get('Message-ID', '')
+                in_reply_to = msg.get('In-Reply-To')
+                references = msg.get('References')
+                received_at = self._parse_date(msg.get('Date'))
                 text = self._extract_text(msg)
-                classification = self._classify(text)
 
                 item = ReplyItem(
                     message_id=message_id,
                     from_email=from_email,
                     subject=subject,
                     snippet=text[:200],
-                    classification=classification,
+                    in_reply_to=in_reply_to,
+                    references=references,
+                    received_at=received_at,
                 )
 
-                if classification in {'interested', 'question'}:
-                    draft_payload = DraftCreateRequest(
-                        to=self.settings.FROM_EMAIL,
-                        subject=subject,
-                        body_text='Danke für Ihre Nachricht. Wir melden uns zeitnah mit weiteren Details.',
-                        from_email=self.settings.FROM_EMAIL,
-                        reply_to_message_id=message_id or None,
-                        references=msg.get('References'),
-                    )
-                    self.draft_writer.create_draft(draft_payload)
-                    item.draft_created = True
-                    created_drafts += 1
+                if self._matches_filters(item, filters):
+                    items.append(item)
 
-                items.append(item)
-
-        logger.info('Processed %s replies, created %s drafts.', len(items), created_drafts)
-        return items, created_drafts
+        logger.info('Polled %s replies (no auto-reply/no auto-send).', len(items))
+        return items
 
     @staticmethod
     def _extract_text(msg: email.message.Message) -> str:
@@ -83,14 +74,18 @@ class ReplyReader:
         return (payload or b'').decode(msg.get_content_charset() or 'utf-8', errors='ignore').strip()
 
     @staticmethod
-    def _classify(text: str) -> str:
-        t = text.lower()
-        if any(k in t for k in ['unsubscribe', 'abmelden']):
-            return 'unsubscribe'
-        if any(k in t for k in ['kein interesse', 'not interested', 'no thanks']):
-            return 'not_interested'
-        if '?' in t or 'frage' in t:
-            return 'question'
-        if any(k in t for k in ['interesse', 'sounds good', 'let\'s talk']):
-            return 'interested'
-        return 'unclear'
+    def _matches_filters(item: ReplyItem, filters: RepliesPollRequest) -> bool:
+        if filters.message_id and filters.message_id != item.message_id:
+            return False
+        if filters.from_email and filters.from_email.lower() not in item.from_email.lower():
+            return False
+        return True
+
+    @staticmethod
+    def _parse_date(date_header: str | None) -> str | None:
+        if not date_header:
+            return None
+        try:
+            return parsedate_to_datetime(date_header).isoformat()
+        except Exception:
+            return None
