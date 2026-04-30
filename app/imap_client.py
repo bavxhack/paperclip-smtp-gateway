@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import imaplib
 import logging
+import re
 import socket
 from contextlib import contextmanager
 
@@ -39,11 +40,19 @@ class ImapClient:
             if status != 'OK':
                 raise RuntimeError('Could not list IMAP folders')
 
-            names = []
+            names: list[str] = []
             for raw in folders or []:
-                line = raw.decode(errors='ignore')
-                if '"' in line:
-                    names.append(line.split('"')[-2])
-                else:
-                    names.append(line)
+                line = raw.decode(errors='ignore').strip()
+
+                # Typical LIST response example:
+                # (\HasNoChildren) "/" "INBOX"
+                match = re.search(r'"((?:[^"\]|\.)*)"\s*$', line)
+                if match:
+                    names.append(match.group(1).replace('\\"', '"'))
+                    continue
+
+                # Fallback for unquoted mailbox names
+                parts = line.rsplit(' ', 1)
+                names.append(parts[-1].strip('"'))
+
             return names
