@@ -46,7 +46,7 @@ class ImapClient:
 
                 # Typical LIST response example:
                 # (\HasNoChildren) "/" "INBOX"
-                match = re.search(r'"((?:[^"\]|\.)*)"\s*$', line)
+                match = re.search(r'"((?:[^"\\]|\\.)*)"\s*$', line)
                 if match:
                     names.append(match.group(1).replace('\\"', '"'))
                     continue
