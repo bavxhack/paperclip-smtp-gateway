@@ -31,7 +31,8 @@
 - Response 200 (`RepliesPollResponse`):
   - `status`: Literal `"ok"`
   - `processed`: `int`
-  - `items`: `ReplyItem[]`
+  - `items`: `ReplyItem[]` (all matched messages from inbox polling)
+  - `unseen_items`: `ReplyItem[]` (subset of `items`, only unread messages)
 
 `ReplyItem`:
 - `message_id`: `str`
