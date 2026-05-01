@@ -106,11 +106,33 @@ docker pull ghcr.io/<github_owner>/paperclip-mail-agent:latest
 
 Docker Compose with prebuilt GHCR image:
 ```yaml
-services:
   paperclip-mail-agent:
-    image: ghcr.io/<github_owner>/paperclip-mail-agent:latest
-    env_file: [.env]
-    ports: ["8088:8088"]
+    image: ghcr.io/bavxhack/paperclip-mail-agent:latest
+    environment:
+      APP_PORT: 8088
+      LOG_LEVEL: INFO
+      
+      IMAP_HOST: <yourserver.com>
+      IMAP_PORT: 993
+      IMAP_USER: <youruser>
+      IMAP_PASSWORD: "<yourpassword>"
+      IMAP_INBOX_FOLDER: "<your INBOX Folder>"
+      IMAP_DRAFTS_FOLDER: "<your draft folder name>"
+      IMAP_USE_SSL: true
+      
+      SMTP_HOST: "<yourserver.com>"
+      SMTP_PORT: 465
+      
+      FROM_EMAIL: "<your from email@domain.com>"
+      FROM_NAME: "<your name>"
+      
+      PAPERCLIP_BASE_URL: "http://server:3100"
+      PAPERCLIP_API_KEY=: "<your paperclip api key>"
+    
+      POLL_LIMIT: 10
+      DRY_RUN: false
+    ports:
+      - "8088:8088"
 ```
 
 ## GitHub Actions release/publish
@@ -119,6 +141,10 @@ Workflow: `.github/workflows/docker-publish.yml`
 - runs on tags `v*.*.*`
 - builds/pushes to GHCR
 - tags: `latest` (main), `sha`, `semver`
+
+## Paperclip Skill
+- The repo includes a paperclip skill to access the mail agent api.
+- Add The repo as a new skill. there is a SKILL.md file with the API description
 
 ## GDPR / cold email / human in the loop
 - This service is a technical tool for draft automation.
