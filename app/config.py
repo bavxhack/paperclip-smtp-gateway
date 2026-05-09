@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     FROM_EMAIL: str = ''
     FROM_NAME: str = ''
+    FIXED_FROM_EMAIL: str = ''
 
     PAPERCLIP_BASE_URL: HttpUrl | None = None
     PAPERCLIP_API_KEY: str = ''
