@@ -21,6 +21,9 @@ Docker-based FastAPI service that acts as a secure mail gateway between Papercli
 - `POST /drafts/create`
 - `POST /replies/poll`
 - `POST /paperclip/webhook`
+- `POST /emails/messages`
+- `GET /dashboard/summary`
+- `GET /dashboard`
 
 ## Setup with Docker Compose
 ```bash
@@ -151,3 +154,26 @@ Workflow: `.github/workflows/docker-publish.yml`
 - Verify data privacy, competition law, and industry requirements before production use.
 - Sending approval should always be done by a human (human in the loop).
 - **No legal advice.**
+
+
+## Nachrichten abrufen (gesendet/entwürfe/posteingang)
+```bash
+curl -X POST http://localhost:8088/emails/messages \
+  -H "Content-Type: application/json" \
+  -d '{
+    "folder": "Sent",
+    "email_address": "kunde@example.com",
+    "limit": 25
+  }'
+```
+
+- `folder`: beliebiger IMAP-Ordner (z. B. `INBOX`, `Drafts`, `Sent`)
+- `email_address` optional: filtert auf Absender oder Empfänger
+- Ohne `email_address` werden alle Nachrichten im Ordner geladen
+
+## Dashboard
+- `GET /dashboard` liefert ein Web-Dashboard mit:
+  - Kennzahlen für Inbox, Entwürfe und Gesendet
+  - Filter nach E-Mail-Adresse
+  - Mini-SMTP-Client Ansicht für Inbox/Entwürfe/Gesendet
+- `GET /dashboard/summary` liefert die Dashboard-Daten als JSON

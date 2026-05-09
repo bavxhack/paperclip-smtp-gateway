@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     IMAP_PASSWORD: str = ''
     IMAP_INBOX_FOLDER: str = 'INBOX'
     IMAP_DRAFTS_FOLDER: str = 'Drafts'
+    IMAP_SENT_FOLDER: str = 'Sent'
     IMAP_USE_SSL: bool = True
 
     SMTP_HOST: str = Field(default='smtp.kasserver.com')
