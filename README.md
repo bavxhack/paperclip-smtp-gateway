@@ -38,6 +38,8 @@ See `.env.example`.
 Important variables:
 - `PAPERCLIP_BASE_URL`, `PAPERCLIP_API_KEY`
 - `IMAP_*` for inbox/drafts access
+- `IMAP_SENT_FOLDER` for the sent folder (for dashboard/message view)
+- `FIXED_FROM_EMAIL` to enforce a fixed sender address for all drafts
 - `DRY_RUN=true` for safe tests without writing drafts
 
 ALL-INKL defaults:

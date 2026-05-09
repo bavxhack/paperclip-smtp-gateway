@@ -102,23 +102,42 @@ def dashboard() -> str:
     sent_folder = settings.IMAP_SENT_FOLDER
     return f"""
 <!doctype html><html><head><meta charset='utf-8'><title>SMTP Gateway Dashboard</title>
-<style>body{{font-family:Arial;margin:20px}}.grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}}.card{{border:1px solid #ddd;padding:12px;border-radius:8px}}.cols{{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}}pre{{white-space:pre-wrap;background:#f7f7f7;padding:8px;border-radius:6px}}</style>
+<style>
+:root{{--bg:#0b1020;--bg2:#131b33;--card:#1b2547;--text:#edf2ff;--muted:#adc0f8;--accent:#6ea8fe;--ok:#59d39b}}
+*{{box-sizing:border-box}}body{{margin:0;font-family:Inter,Segoe UI,Arial,sans-serif;background:radial-gradient(circle at top right,#1b2b57 0,#0b1020 50%,#070b18 100%);color:var(--text)}}
+.wrap{{max-width:1300px;margin:0 auto;padding:24px}}h1{{margin:0 0 4px;font-size:28px}}p{{color:var(--muted)}}
+.stats,.cols{{display:grid;gap:12px}}.stats{{grid-template-columns:repeat(3,minmax(140px,1fr));margin:16px 0}}.cols{{grid-template-columns:repeat(3,minmax(260px,1fr))}}
+.card{{background:linear-gradient(160deg,var(--card),var(--bg2));border:1px solid #2e3f75;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(0,0,0,.25)}}
+.kpi{{font-size:13px;color:var(--muted)}}.num{{display:block;font-size:30px;font-weight:700;color:var(--ok);margin-top:4px}}
+.toolbar{{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}}input{{background:#0d1530;color:var(--text);border:1px solid #30457f;border-radius:10px;padding:10px 12px;min-width:260px}}
+button{{border:1px solid #3558b8;background:#12307a;color:#fff;border-radius:10px;padding:10px 12px;font-weight:600;cursor:pointer}}button:hover{{filter:brightness(1.12)}}
+.list{{max-height:65vh;overflow:auto;display:grid;gap:8px}}.item{{background:#0d1530;border:1px solid #2b3f74;border-radius:10px;padding:10px}}
+.meta{{font-size:12px;color:var(--muted);margin-top:4px}}.snippet{{margin-top:8px;white-space:pre-wrap;color:#dce5ff}}
+</style>
 </head><body>
+<div class='wrap'>
 <h1>SMTP Gateway Dashboard</h1>
-<div class='grid'><div class='card'>Inbox: <b id='inbox'>-</b></div><div class='card'>Drafts: <b id='drafts'>-</b></div><div class='card'>Sent: <b id='sent'>-</b></div></div>
-<h2>Filter</h2><input id='email' placeholder='user@example.com'>
-<button onclick="loadFolder('{inbox_folder}','inboxList')">Inbox laden</button>
-<button onclick="loadFolder('{drafts_folder}','draftsList')">Entwürfe laden</button>
-<button onclick="loadFolder('{sent_folder}','sentList')">Gesendet laden</button>
-<div class='cols'><div><h3>Inbox</h3><div id='inboxList'></div></div><div><h3>Entwürfe</h3><div id='draftsList'></div></div><div><h3>Gesendet</h3><div id='sentList'></div></div></div>
+<p>Inbox, Entwürfe und Gesendet im Live-Überblick.</p>
+<div class='stats'>
+  <div class='card'><span class='kpi'>Inbox</span><span class='num' id='inbox'>-</span></div>
+  <div class='card'><span class='kpi'>Entwürfe</span><span class='num' id='drafts'>-</span></div>
+  <div class='card'><span class='kpi'>Gesendet</span><span class='num' id='sent'>-</span></div>
+</div>
+<div class='toolbar'>
+  <input id='email' placeholder='Filter: user@example.com'>
+  <button onclick="loadFolder('{inbox_folder}','inboxList')">Inbox laden</button>
+  <button onclick="loadFolder('{drafts_folder}','draftsList')">Entwürfe laden</button>
+  <button onclick="loadFolder('{sent_folder}','sentList')">Gesendet laden</button>
+</div>
+<div class='cols'>
+  <div class='card'><h3>Inbox ({inbox_folder})</h3><div class='list' id='inboxList'></div></div>
+  <div class='card'><h3>Entwürfe ({drafts_folder})</h3><div class='list' id='draftsList'></div></div>
+  <div class='card'><h3>Gesendet ({sent_folder})</h3><div class='list' id='sentList'></div></div>
+</div></div>
 <script>
-async function loadSummary(){{const r=await fetch('/dashboard/summary');const j=await r.json();document.getElementById('inbox').textContent=j.inbox_count;document.getElementById('drafts').textContent=j.drafts_count;document.getElementById('sent').textContent=j.sent_count;}}
-async function loadFolder(folder,target){{const email=document.getElementById('email').value||null;const r=await fetch('/emails/messages',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{folder:folder,email_address:email,limit:25}})}});const j=await r.json();document.getElementById(target).innerHTML=(j.items||[]).map(i=>`<pre><b>${{i.subject||'(ohne Betreff)'}}</b>
-Von: ${{i.from_email}}
-An: ${{i.to_email}}
-Datum: ${{i.received_at||'-'}}
-
-${{i.snippet||''}}</pre>`).join('');}}
+const esc=(s)=>String(s||'').replace(/[&<>"]/g,m=>({{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}}[m]));
+async function loadSummary(){{const r=await fetch('/dashboard/summary');const j=await r.json();inbox.textContent=j.inbox_count;drafts.textContent=j.drafts_count;sent.textContent=j.sent_count;}}
+async function loadFolder(folder,target){{const email=document.getElementById('email').value||null;const r=await fetch('/emails/messages',{{method:'POST',headers:{{'Content-Type':'application/json'}},body:JSON.stringify({{folder:folder,email_address:email,limit:25}})}});const j=await r.json();document.getElementById(target).innerHTML=(j.items||[]).map(i=>`<div class="item"><b>${{esc(i.subject||'(ohne Betreff)')}}</b><div class="meta">Von: ${{esc(i.from_email)}} · An: ${{esc(i.to_email)}} · Datum: ${{esc(i.received_at||'-')}}</div><div class="snippet">${{esc(i.snippet||'')}}</div></div>`).join('');}}
 loadSummary();
 </script></body></html>
 """

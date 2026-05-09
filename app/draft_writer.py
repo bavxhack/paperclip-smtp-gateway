@@ -33,8 +33,10 @@ class DraftWriter:
 
     def _build_message(self, payload: DraftCreateRequest) -> EmailMessage:
         message = EmailMessage()
+        fixed_from_email = self.settings.FIXED_FROM_EMAIL.strip()
+        from_email = fixed_from_email or payload.from_email
         from_name = self.settings.FROM_NAME.strip()
-        message['From'] = formataddr((from_name, payload.from_email)) if from_name else payload.from_email
+        message['From'] = formataddr((from_name, from_email)) if from_name else from_email
         message['To'] = payload.to
         message['Subject'] = payload.subject
         message['Message-ID'] = make_msgid()
