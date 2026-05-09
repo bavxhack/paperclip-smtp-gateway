@@ -53,3 +53,36 @@ class RepliesPollResponse(BaseModel):
 class PaperclipWebhookPayload(BaseModel):
     event: str
     data: dict = Field(default_factory=dict)
+
+
+class EmailMessagesQuery(BaseModel):
+    folder: str = Field(min_length=1, max_length=255)
+    email_address: EmailStr | None = None
+    limit: int = Field(default=50, ge=1, le=200)
+
+
+class EmailMessageItem(BaseModel):
+    uid: str
+    folder: str
+    message_id: str
+    from_email: str
+    to_email: str
+    subject: str
+    snippet: str
+    body_text: str
+    received_at: str | None = None
+
+
+class EmailMessagesResponse(BaseModel):
+    status: Literal['ok'] = 'ok'
+    total_in_folder: int
+    returned: int
+    items: list[EmailMessageItem]
+
+
+class GatewayDashboardResponse(BaseModel):
+    status: Literal['ok'] = 'ok'
+    inbox_count: int
+    drafts_count: int
+    sent_count: int
+    recent_activity: list[EmailMessageItem]
