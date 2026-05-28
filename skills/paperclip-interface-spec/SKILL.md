@@ -14,11 +14,14 @@ Produce a precise, reusable interface specification for `paperclip-smtp-gateway`
    - Request fields including types and constraints
    - Response fields including types
    - Error cases/validation
-4. If anything is unclear, inspect implementation in `app/main.py`, `app/models.py`, `app/paperclip_client.py`.
+4. If anything is unclear, inspect implementation in `app/main.py`, `app/models.py`, `app/config.py`, `app/reply_reader.py`, `app/paperclip_client.py`.
 5. Do not make silent assumptions; mark unknown fields explicitly as “not specified”.
-6. For `/replies/poll`, always document both arrays in `RepliesPollResponse`:
-   - `items` = full matched mail history from polling
-   - `unseen_items` = unread subset for incremental processing/parsing
+6. For `/replies/poll`, always document the polling window and response arrays:
+   - `limit` is optional (`1..1000`) and defaults to server `POLL_LIMIT` when omitted.
+   - Server `POLL_LIMIT` defaults to `100` and is configurable up to `1000`.
+   - Results are evaluated newest-first from `IMAP_INBOX_FOLDER`.
+   - `items` = newest matched replies, capped by the effective limit after filters are applied.
+   - `unseen_items` = unread subset of returned `items` for incremental processing/parsing.
 
 ## Recommended output format
 - Section `API`

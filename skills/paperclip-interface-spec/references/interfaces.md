@@ -25,15 +25,24 @@
   - `folder`: `str`
 
 ### POST /replies/poll
+- Purpose: poll replies from `IMAP_INBOX_FOLDER` for Paperclip processing.
 - Request (`RepliesPollRequest`):
-  - `message_id`: `str | null` (optional)
-  - `from_email`: `EmailStr | null` (optional)
+  - `message_id`: `str | null` (optional; exact match against `ReplyItem.message_id`)
+  - `from_email`: `EmailStr | null` (optional; case-insensitive containment match against `ReplyItem.from_email`)
   - `limit`: `int | null` (optional, default uses server `POLL_LIMIT`, min `1`, max `1000`)
+- Effective default limit:
+  - `POLL_LIMIT`: default `100`, min `1`, max `1000`.
+- Polling behavior:
+  - Selects `IMAP_INBOX_FOLDER`.
+  - Searches `ALL` messages and evaluates them newest-first.
+  - Searches `UNSEEN` messages separately to identify unread returned items.
+  - Applies `message_id` / `from_email` filters before enforcing the effective limit.
+  - Does not delete messages.
 - Response 200 (`RepliesPollResponse`):
   - `status`: Literal `"ok"`
-  - `processed`: `int`
-  - `items`: `ReplyItem[]`
-  - `unseen_items`: `ReplyItem[]`
+  - `processed`: `int` (number of returned `items`)
+  - `items`: `ReplyItem[]` (newest matched replies, capped by effective limit)
+  - `unseen_items`: `ReplyItem[]` (unread subset of returned `items`)
 
 ### POST /emails/messages
 - Purpose: retrieve emails from a specific IMAP folder with optional filtering by email address.
@@ -70,6 +79,17 @@
 
 ## 2) Models
 
+`RepliesPollRequest`:
+- `message_id`: `str | null` (optional)
+- `from_email`: `EmailStr | null` (optional)
+- `limit`: `int | null` (optional, default server `POLL_LIMIT`, min `1`, max `1000`)
+
+`RepliesPollResponse`:
+- `status`: Literal `"ok"`
+- `processed`: `int`
+- `items`: `ReplyItem[]`
+- `unseen_items`: `ReplyItem[]`
+
 `ReplyItem`:
 - `message_id`: `str`
 - `from_email`: `str`
@@ -90,11 +110,18 @@
 - `body_text`: `str`
 - `received_at`: `str | null`
 
-## 3) Standard error object
+## 3) Runtime settings relevant to interfaces
+
+- `POLL_LIMIT`: default `100`, min `1`, max `1000`; default maximum for `/replies/poll` when the request omits `limit`.
+- `IMAP_INBOX_FOLDER`: folder used by `/replies/poll`.
+- `IMAP_DRAFTS_FOLDER`: folder used by `/drafts/create`.
+- `IMAP_SENT_FOLDER`: folder used by dashboard/message retrieval examples.
+
+## 4) Standard error object
 - `ErrorResponse`:
   - `detail`: `str`
 
-## 4) Paperclip integration contract (outbound)
+## 5) Paperclip integration contract (outbound)
 
 If `PAPERCLIP_BASE_URL` is set, the service uses `PaperclipAgent`:
 
