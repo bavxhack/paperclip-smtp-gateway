@@ -41,6 +41,7 @@ Important variables:
 - `IMAP_SENT_FOLDER` for the sent folder (for dashboard/message view)
 - `FIXED_FROM_EMAIL` to enforce a fixed sender address for all drafts
 - `DRY_RUN=true` for safe tests without writing drafts
+- `POLL_LIMIT` controls the default maximum number of replies returned by `/replies/poll` (default `100`, max `1000`).
 
 ALL-INKL defaults:
 - `IMAP_HOST=imap.kasserver.com`
@@ -85,12 +86,14 @@ Request body (optional filters):
 ```json
 {
   "message_id": "<abc@example.com>",
-  "from_email": "lead@example.com"
+  "from_email": "lead@example.com",
+  "limit": 100
 }
 ```
 
 Behavior:
-- Reads unread replies (`UNSEEN`) from `IMAP_INBOX_FOLDER`.
+- Reads newest messages first from `IMAP_INBOX_FOLDER` and returns up to `limit` matching replies (`POLL_LIMIT` when omitted).
+- Also reads unread replies (`UNSEEN`) and returns the unread subset in `unseen_items`.
 - Does **not** evaluate/classify and does **not** auto-generate a reply.
 - Returns reply data including `message_id` so Paperclip AI can load thread history.
 - Optional filtering by `from_email` for all matching emails.
@@ -134,7 +137,7 @@ Docker Compose with prebuilt GHCR image:
       PAPERCLIP_BASE_URL: "http://server:3100"
       PAPERCLIP_API_KEY=: "<your paperclip api key>"
     
-      POLL_LIMIT: 10
+      POLL_LIMIT: 100
       DRY_RUN: false
     ports:
       - "8088:8088"

@@ -34,8 +34,9 @@ class ReplyReader:
             if status != 'OK':
                 raise RuntimeError('Could not search unread messages')
 
-            ids = (data[0].split() if data and data[0] else [])[: self.settings.POLL_LIMIT]
-            unseen_ids = set((unseen_data[0].split() if unseen_data and unseen_data[0] else [])[: self.settings.POLL_LIMIT])
+            ids = list(reversed(data[0].split() if data and data[0] else []))
+            unseen_ids = set(unseen_data[0].split() if unseen_data and unseen_data[0] else [])
+            result_limit = filters.limit or self.settings.POLL_LIMIT
 
             for mail_id in ids:
                 status, msg_data = client.fetch(mail_id, '(RFC822)')
@@ -67,6 +68,8 @@ class ReplyReader:
                     items.append(item)
                     if mail_id in unseen_ids:
                         unseen_items.append(item)
+                    if len(items) >= result_limit:
+                        break
 
         logger.info(
             'Polled %s replies including %s unread (no auto-reply/no auto-send).',
