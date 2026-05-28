@@ -28,6 +28,7 @@
 - Request (`RepliesPollRequest`):
   - `message_id`: `str | null` (optional)
   - `from_email`: `EmailStr | null` (optional)
+  - `limit`: `int | null` (optional, default uses server `POLL_LIMIT`, min `1`, max `1000`)
 - Response 200 (`RepliesPollResponse`):
   - `status`: Literal `"ok"`
   - `processed`: `int`

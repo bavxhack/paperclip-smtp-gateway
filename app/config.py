@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     PAPERCLIP_BASE_URL: HttpUrl | None = None
     PAPERCLIP_API_KEY: str = ''
 
-    POLL_LIMIT: int = Field(default=10, ge=1, le=100)
+    POLL_LIMIT: int = Field(default=100, ge=1, le=1000)
     DRY_RUN: bool = False
 
 

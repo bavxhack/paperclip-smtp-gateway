@@ -31,6 +31,7 @@ class DraftCreateResponse(BaseModel):
 class RepliesPollRequest(BaseModel):
     message_id: str | None = None
     from_email: EmailStr | None = None
+    limit: int | None = Field(default=None, ge=1, le=1000)
 
 
 class ReplyItem(BaseModel):
