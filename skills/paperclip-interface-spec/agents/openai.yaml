@@ -2,4 +2,4 @@ version: 1
 interface:
   display_name: Paperclip Interface Spec
   short_description: Exakte API- und Integrationsschnittstellen für paperclip-smtp-gateway.
-  default_prompt: Dokumentiere die Schnittstellen in diesem Repository präzise und strukturiert. Berücksichtige bei /replies/poll das optionale limit, newest-first Polling, POLL_LIMIT=100 als Default und unseen_items als ungelesene Teilmenge der zurückgegebenen items.
+  default_prompt: Dokumentiere die Schnittstellen in diesem Repository präzise und strukturiert. Berücksichtige /send als send-artigen Endpunkt, der intern in den Draft-Ordner schreibt, und bei /replies/poll das optionale limit, newest-first Polling, POLL_LIMIT=100 als Default und unseen_items als ungelesene Teilmenge der zurückgegebenen items.

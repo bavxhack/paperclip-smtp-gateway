@@ -20,6 +20,8 @@ from app.models import (
     PaperclipWebhookPayload,
     RepliesPollRequest,
     RepliesPollResponse,
+    SendEmailRequest,
+    SendEmailResponse,
 )
 from app.paperclip_client import build_agent
 from app.reply_reader import ReplyReader
@@ -58,6 +60,15 @@ def create_draft(payload: DraftCreateRequest) -> DraftCreateResponse:
         return DraftCreateResponse(folder=folder)
     except Exception as exc:
         raise HTTPException(status_code=502, detail=f'Draft creation failed: {exc}') from exc
+
+
+@app.post('/send', response_model=SendEmailResponse)
+def send_email(payload: SendEmailRequest) -> SendEmailResponse:
+    try:
+        folder = draft_writer.create_draft(payload)
+        return SendEmailResponse(folder=folder)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=f'Email send failed: {exc}') from exc
 
 
 @app.post('/replies/poll', response_model=RepliesPollResponse)

@@ -10,15 +10,16 @@ Docker-based FastAPI service that acts as a secure mail gateway between Papercli
 
 ## Security principle
 **Never send automatically.**
-- No SMTP send endpoint.
-- No sending logic is implemented.
-- Reply emails are stored as drafts only.
+- `/send` is a compatibility endpoint for agents that expect a send action.
+- No SMTP sending logic is implemented.
+- Both `/drafts/create` and `/send` store messages as drafts only.
 - Logging is defensive (no passwords, no full sensitive content).
 
 ## API endpoints
 - `GET /health`
 - `GET /imap/folders`
 - `POST /drafts/create`
+- `POST /send`
 - `POST /replies/poll`
 - `POST /paperclip/webhook`
 - `POST /emails/messages`
@@ -81,6 +82,36 @@ Newline compatibility:
 - `body_text` and optional `body_html` can contain normal JSON newlines, for example `"Hello\nWorld"` after JSON decoding.
 - They can also contain literal escaped newline markers from older clients, for example the two characters `\\n`.
 - Before the draft is written, the gateway normalizes literal `\\n`, `\\r\\n`, and `\\r` markers to real line breaks, so both input variants create readable drafts.
+
+
+## Example: POST /send
+```bash
+curl -X POST http://localhost:8088/send \
+  -H "Content-Type: application/json" \
+  -d '{
+    "to": "lead@example.com",
+    "subject": "Quick question",
+    "body_text": "Hello ...",
+    "body_html": "<p>Hello ...</p>",
+    "from_email": "me@example.com",
+    "reply_to_message_id": null,
+    "references": null
+  }'
+```
+
+Response:
+```json
+{
+  "status": "sent",
+  "folder": "Drafts"
+}
+```
+
+Behavior:
+- `/send` accepts the same request body as `/drafts/create`.
+- The endpoint is intentionally send-like for agents, but it does **not** send via SMTP.
+- Internally it uses the same draft creation mechanism and writes the message to `IMAP_DRAFTS_FOLDER` (for example the SMTP/Thunderbird draft folder).
+- Newline normalization is identical to `/drafts/create`.
 
 ## Example: POST /replies/poll
 ```bash
