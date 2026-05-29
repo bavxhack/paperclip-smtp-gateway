@@ -16,7 +16,10 @@ Produce a precise, reusable interface specification for `paperclip-smtp-gateway`
    - Error cases/validation
 4. If anything is unclear, inspect implementation in `app/main.py`, `app/models.py`, `app/config.py`, `app/reply_reader.py`, `app/paperclip_client.py`.
 5. Do not make silent assumptions; mark unknown fields explicitly as “not specified”.
-6. For `/replies/poll`, always document the polling window and response arrays:
+6. For `/drafts/create`, always document draft body newline compatibility:
+   - `body_text` and optional `body_html` accept both real newline characters and literal escaped newline markers (`\\n`, `\\r\\n`, `\\r`).
+   - The gateway normalizes literal escaped markers to real line breaks before writing IMAP drafts, so clients may send either representation.
+7. For `/replies/poll`, always document the polling window and response arrays:
    - `limit` is optional (`1..1000`) and defaults to server `POLL_LIMIT` when omitted.
    - Server `POLL_LIMIT` defaults to `100` and is configurable up to `1000`.
    - Results are evaluated newest-first from `IMAP_INBOX_FOLDER`.

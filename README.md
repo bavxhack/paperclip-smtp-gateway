@@ -77,6 +77,11 @@ Response:
 }
 ```
 
+Newline compatibility:
+- `body_text` and optional `body_html` can contain normal JSON newlines, for example `"Hello\nWorld"` after JSON decoding.
+- They can also contain literal escaped newline markers from older clients, for example the two characters `\\n`.
+- Before the draft is written, the gateway normalizes literal `\\n`, `\\r\\n`, and `\\r` markers to real line breaks, so both input variants create readable drafts.
+
 ## Example: POST /replies/poll
 ```bash
 curl -X POST http://localhost:8088/replies/poll
