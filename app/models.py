@@ -28,6 +28,15 @@ class DraftCreateResponse(BaseModel):
     folder: str
 
 
+class SendEmailRequest(DraftCreateRequest):
+    pass
+
+
+class SendEmailResponse(BaseModel):
+    status: Literal['sent'] = 'sent'
+    folder: str
+
+
 class RepliesPollRequest(BaseModel):
     message_id: str | None = None
     from_email: EmailStr | None = None

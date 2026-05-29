@@ -24,6 +24,13 @@
   - `status`: Literal `"created"`
   - `folder`: `str`
 
+### POST /send
+- Purpose: provide a send-like endpoint for agents while still using the draft safety mechanism. Messages submitted here are not sent via SMTP; they are written to `IMAP_DRAFTS_FOLDER` using the same mechanism as `/drafts/create`.
+- Request (`SendEmailRequest`): same fields and validation as `DraftCreateRequest`. `body_text` and optional `body_html` support the same newline normalization as `/drafts/create`.
+- Response 200 (`SendEmailResponse`):
+  - `status`: Literal `"sent"`
+  - `folder`: `str` (the draft folder where the message was stored)
+
 ### POST /replies/poll
 - Purpose: poll replies from `IMAP_INBOX_FOLDER` for Paperclip processing.
 - Request (`RepliesPollRequest`):
@@ -79,6 +86,13 @@
 
 ## 2) Models
 
+`SendEmailRequest`:
+- Same fields and constraints as `DraftCreateRequest`; used by `POST /send`.
+
+`SendEmailResponse`:
+- `status`: Literal `"sent"`
+- `folder`: `str`
+
 `RepliesPollRequest`:
 - `message_id`: `str | null` (optional)
 - `from_email`: `EmailStr | null` (optional)
@@ -114,12 +128,12 @@
 
 - `POLL_LIMIT`: default `100`, min `1`, max `1000`; default maximum for `/replies/poll` when the request omits `limit`.
 - `IMAP_INBOX_FOLDER`: folder used by `/replies/poll`.
-- `IMAP_DRAFTS_FOLDER`: folder used by `/drafts/create`.
+- `IMAP_DRAFTS_FOLDER`: folder used by `/drafts/create` and `/send`.
 - `IMAP_SENT_FOLDER`: folder used by dashboard/message retrieval examples.
 
 ## 3.1) Draft newline normalization
 
-For `/drafts/create`, Paperclip clients may send line breaks in either supported form:
+For `/drafts/create` and `/send`, Paperclip clients may send line breaks in either supported form:
 
 - real newline characters, for example JSON-decoded `"Hello\nWorld"`;
 - literal escaped newline markers, for example the two characters `\\n` in `"Hello\\\\nWorld"`.
