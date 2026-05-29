@@ -1,12 +1,20 @@
 from __future__ import annotations
 
-import email
 from email.message import EmailMessage
 from email.utils import formataddr, make_msgid
 
 from app.config import Settings
 from app.imap_client import ImapClient
 from app.models import DraftCreateRequest
+
+
+def normalize_draft_newlines(text: str) -> str:
+    """Accept real newlines and literal escaped newline markers in draft bodies."""
+    return (
+        text.replace('\\r\\n', '\n')
+        .replace('\\n', '\n')
+        .replace('\\r', '\n')
+    )
 
 
 class DraftWriter:
@@ -48,7 +56,7 @@ class DraftWriter:
             if not payload.subject.lower().startswith('re:'):
                 message.replace_header('Subject', f"Re: {payload.subject}")
 
-        message.set_content(payload.body_text)
+        message.set_content(normalize_draft_newlines(payload.body_text))
         if payload.body_html:
-            message.add_alternative(payload.body_html, subtype='html')
+            message.add_alternative(normalize_draft_newlines(payload.body_html), subtype='html')
         return message

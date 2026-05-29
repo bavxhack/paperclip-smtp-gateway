@@ -15,8 +15,8 @@
 - Request (`DraftCreateRequest`):
   - `to`: `EmailStr` (required)
   - `subject`: `str` (required, min_length=1, max_length=998)
-  - `body_text`: `str` (required, min_length=1)
-  - `body_html`: `str | null` (optional)
+  - `body_text`: `str` (required, min_length=1). Accepts both real newline characters and literal escaped newline markers (`\\n`, `\\r\\n`, `\\r`); the gateway normalizes escaped markers to real line breaks before writing the draft.
+  - `body_html`: `str | null` (optional). If provided, literal escaped newline markers are normalized the same way before writing the HTML draft alternative.
   - `from_email`: `EmailStr` (required)
   - `reply_to_message_id`: `str | null` (optional)
   - `references`: `str | null` (optional)
@@ -116,6 +116,15 @@
 - `IMAP_INBOX_FOLDER`: folder used by `/replies/poll`.
 - `IMAP_DRAFTS_FOLDER`: folder used by `/drafts/create`.
 - `IMAP_SENT_FOLDER`: folder used by dashboard/message retrieval examples.
+
+## 3.1) Draft newline normalization
+
+For `/drafts/create`, Paperclip clients may send line breaks in either supported form:
+
+- real newline characters, for example JSON-decoded `"Hello\nWorld"`;
+- literal escaped newline markers, for example the two characters `\\n` in `"Hello\\\\nWorld"`.
+
+Before creating the MIME draft, the gateway converts literal `\\r\\n`, `\\n`, and `\\r` markers in `body_text` and `body_html` to real `\n` line breaks. This keeps older clients that send literal markers compatible while preserving clients that already send real line breaks.
 
 ## 4) Standard error object
 - `ErrorResponse`:
