@@ -114,7 +114,7 @@ DASHBOARD_HTML = """
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SMTP Gateway Dashboard</title>
     <style>
-        :root {{
+        :root {
             --bg-primary: #0b1020;
             --bg-secondary: #131b33;
             --bg-card: #1b2547;
@@ -133,33 +133,33 @@ DASHBOARD_HTML = """
             --radius: 14px;
             --radius-sm: 10px;
             --transition: all 0.2s ease;
-        }}
+        }
 
-        * {{
+        * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-        }}
+        }
 
-        body {{
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Inter, Roboto, Oxygen, Ubuntu, sans-serif;
             background: radial-gradient(circle at top right, #1b2b57 0%, #0b1020 50%, #070b18 100%);
             color: var(--text-primary);
             min-height: 100vh;
             line-height: 1.6;
-        }}
+        }
 
-        .container {{
+        .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 24px;
-        }}
+        }
 
-        header {{
+        header {
             margin-bottom: 32px;
-        }}
+        }
 
-        h1 {{
+        h1 {
             font-size: 32px;
             font-weight: 700;
             margin-bottom: 8px;
@@ -167,21 +167,21 @@ DASHBOARD_HTML = """
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }}
+        }
 
-        .subtitle {{
+        .subtitle {
             color: var(--text-secondary);
             font-size: 16px;
-        }}
+        }
 
-        .stats-grid {{
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 32px;
-        }}
+        }
 
-        .stat-card {{
+        .stat-card {
             background: linear-gradient(160deg, var(--bg-card), var(--bg-secondary));
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -190,9 +190,9 @@ DASHBOARD_HTML = """
             transition: var(--transition);
             position: relative;
             overflow: hidden;
-        }}
+        }
 
-        .stat-card::before {{
+        .stat-card::before {
             content: '';
             position: absolute;
             top: 0;
@@ -200,30 +200,30 @@ DASHBOARD_HTML = """
             right: 0;
             height: 4px;
             background: linear-gradient(90deg, var(--accent), var(--success));
-        }}
+        }
 
-        .stat-card:hover {{
+        .stat-card:hover {
             transform: translateY(-4px);
             box-shadow: var(--shadow-lg);
-        }}
+        }
 
-        .stat-label {{
+        .stat-label {
             font-size: 14px;
             color: var(--text-secondary);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 12px;
             font-weight: 600;
-        }}
+        }
 
-        .stat-value {{
+        .stat-value {
             font-size: 42px;
             font-weight: 800;
             color: var(--success);
             display: block;
-        }}
+        }
 
-        .toolbar {{
+        .toolbar {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
@@ -233,16 +233,16 @@ DASHBOARD_HTML = """
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-        }}
+        }
 
-        .search-box {{
+        .search-box {
             flex: 1;
             min-width: 280px;
             max-width: 400px;
-        }}
+        }
 
         input[type="text"],
-        input[type="email"] {{
+        input[type="email"] {
             width: 100%;
             background: var(--bg-primary);
             color: var(--text-primary);
@@ -251,16 +251,16 @@ DASHBOARD_HTML = """
             padding: 12px 16px;
             font-size: 15px;
             transition: var(--transition);
-        }}
+        }
 
         input[type="text"]:focus,
-        input[type="email"]:focus {{
+        input[type="email"]:focus {
             outline: none;
             border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(110, 168, 254, 0.2);
-        }}
+        }
 
-        button {{
+        button {
             background: linear-gradient(135deg, var(--bg-card), var(--bg-hover));
             color: var(--text-primary);
             border: 1px solid var(--border);
@@ -273,137 +273,137 @@ DASHBOARD_HTML = """
             display: inline-flex;
             align-items: center;
             gap: 8px;
-        }}
+        }
 
-        button:hover {{
+        button:hover {
             background: linear-gradient(135deg, var(--bg-hover), var(--bg-card));
             border-color: var(--accent);
             transform: translateY(-2px);
-        }}
+        }
 
-        button:active {{
+        button:active {
             transform: translateY(0);
-        }}
+        }
 
-        button:disabled {{
+        button:disabled {
             opacity: 0.6;
             cursor: not-allowed;
-        }}
+        }
 
-        .content-grid {{
+        .content-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
             gap: 24px;
-        }}
+        }
 
-        .panel {{
+        .panel {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             overflow: hidden;
             box-shadow: var(--shadow);
-        }}
+        }
 
-        .panel-header {{
+        .panel-header {
             padding: 16px 20px;
             background: var(--bg-card);
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-        }}
+        }
 
-        .panel-title {{
+        .panel-title {
             font-size: 18px;
             font-weight: 700;
             color: var(--text-primary);
-        }}
+        }
 
-        .panel-count {{
+        .panel-count {
             background: var(--bg-primary);
             color: var(--text-secondary);
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 13px;
             font-weight: 600;
-        }}
+        }
 
-        .panel-body {{
+        .panel-body {
             padding: 0;
             max-height: 60vh;
             overflow: auto;
-        }}
+        }
 
-        .message-list {{
+        .message-list {
             display: grid;
             gap: 1px;
-        }}
+        }
 
-        .message-item {{
+        .message-item {
             background: var(--bg-primary);
             border-bottom: 1px solid var(--border);
             padding: 16px 20px;
             cursor: pointer;
             transition: var(--transition);
             position: relative;
-        }}
+        }
 
-        .message-item:last-child {{
+        .message-item:last-child {
             border-bottom: none;
-        }}
+        }
 
-        .message-item:hover {{
+        .message-item:hover {
             background: var(--bg-hover);
-        }}
+        }
 
-        .message-item.unread {{
+        .message-item.unread {
             background: linear-gradient(90deg, rgba(110, 168, 254, 0.15), transparent);
             border-left: 4px solid var(--accent);
-        }}
+        }
 
-        .message-item.unread:hover {{
+        .message-item.unread:hover {
             background: linear-gradient(90deg, rgba(110, 168, 254, 0.25), var(--bg-hover));
-        }}
+        }
 
-        .message-header {{
+        .message-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
             margin-bottom: 8px;
-        }}
+        }
 
-        .message-subject {{
+        .message-subject {
             font-size: 16px;
             font-weight: 600;
             color: var(--text-primary);
             word-break: break-word;
             flex: 1;
             margin-right: 12px;
-        }}
+        }
 
-        .message-date {{
+        .message-date {
             color: var(--text-muted);
             font-size: 13px;
             white-space: nowrap;
             text-align: right;
-        }}
+        }
 
-        .message-meta {{
+        .message-meta {
             display: flex;
             gap: 16px;
             font-size: 13px;
             color: var(--text-secondary);
             margin-bottom: 8px;
             flex-wrap: wrap;
-        }}
+        }
 
-        .message-meta span {{
+        .message-meta span {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-        }}
+        }
 
-        .message-snippet {{
+        .message-snippet {
             color: var(--text-muted);
             font-size: 14px;
             line-height: 1.5;
@@ -412,9 +412,9 @@ DASHBOARD_HTML = """
             max-height: 60px;
             overflow: hidden;
             text-overflow: ellipsis;
-        }}
+        }
 
-        .modal-overlay {{
+        .modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
@@ -426,13 +426,13 @@ DASHBOARD_HTML = """
             align-items: center;
             z-index: 1000;
             padding: 20px;
-        }}
+        }
 
-        .modal-overlay.active {{
+        .modal-overlay.active {
             display: flex;
-        }}
+        }
 
-        .modal {{
+        .modal {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: var(--radius);
@@ -442,35 +442,35 @@ DASHBOARD_HTML = """
             overflow: auto;
             box-shadow: var(--shadow-lg);
             animation: modalSlideIn 0.3s ease;
-        }}
+        }
 
-        @keyframes modalSlideIn {{
-            from {{
+        @keyframes modalSlideIn {
+            from {
                 opacity: 0;
                 transform: translateY(-20px);
-            }}
-            to {{
+            }
+            to {
                 opacity: 1;
                 transform: translateY(0);
-            }}
-        }}
+            }
+        }
 
-        .modal-header {{
+        .modal-header {
             padding: 20px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
             background: var(--bg-card);
-        }}
+        }
 
-        .modal-title {{
+        .modal-title {
             font-size: 20px;
             font-weight: 700;
             color: var(--text-primary);
-        }}
+        }
 
-        .modal-close {{
+        .modal-close {
             background: none;
             border: none;
             color: var(--text-secondary);
@@ -478,47 +478,47 @@ DASHBOARD_HTML = """
             cursor: pointer;
             padding: 4px 8px;
             line-height: 1;
-        }}
+        }
 
-        .modal-close:hover {{
+        .modal-close:hover {
             color: var(--danger);
-        }}
+        }
 
-        .modal-body {{
+        .modal-body {
             padding: 24px;
-        }}
+        }
 
-        .message-detail {{
+        .message-detail {
             display: grid;
             gap: 20px;
-        }}
+        }
 
-        .detail-section {{
+        .detail-section {
             border-bottom: 1px solid var(--border);
             padding-bottom: 20px;
-        }}
+        }
 
-        .detail-section:last-child {{
+        .detail-section:last-child {
             border-bottom: none;
             padding-bottom: 0;
-        }}
+        }
 
-        .detail-label {{
+        .detail-label {
             font-size: 12px;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 1px;
             margin-bottom: 4px;
             font-weight: 600;
-        }}
+        }
 
-        .detail-value {{
+        .detail-value {
             color: var(--text-primary);
             font-size: 15px;
             word-break: break-word;
-        }}
+        }
 
-        .message-body {{
+        .message-body {
             background: var(--bg-primary);
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
@@ -529,9 +529,9 @@ DASHBOARD_HTML = """
             line-height: 1.6;
             max-height: 400px;
             overflow: auto;
-        }}
+        }
 
-        .loading {{
+        .loading {
             display: inline-block;
             width: 20px;
             height: 20px;
@@ -539,121 +539,121 @@ DASHBOARD_HTML = """
             border-radius: 50%;
             border-top-color: var(--accent);
             animation: spin 1s ease-in-out infinite;
-        }}
+        }
 
-        @keyframes spin {{
-            to {{ transform: rotate(360deg); }}
-        }}
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
 
-        .loading-overlay {{
+        .loading-overlay {
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 40px;
             color: var(--text-secondary);
-        }}
+        }
 
-        .error-message {{
+        .error-message {
             color: var(--danger);
             padding: 16px;
             text-align: center;
             font-size: 14px;
-        }}
+        }
 
-        .empty-state {{
+        .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: var(--text-muted);
-        }}
+        }
 
-        .empty-state-icon {{
+        .empty-state-icon {
             font-size: 48px;
             margin-bottom: 12px;
-        }}
+        }
 
-        .badge {{
+        .badge {
             display: inline-block;
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 11px;
             font-weight: 600;
             text-transform: uppercase;
-        }}
+        }
 
-        .badge-inbox {{
+        .badge-inbox {
             background: rgba(90, 150, 255, 0.2);
             color: #8ab4ff;
-        }}
+        }
 
-        .badge-drafts {{
+        .badge-drafts {
             background: rgba(255, 193, 7, 0.2);
             color: #ffc107;
-        }}
+        }
 
-        .badge-sent {{
+        .badge-sent {
             background: rgba(89, 211, 155, 0.2);
             color: #59d39b;
-        }}
+        }
 
-        @media (max-width: 1024px) {{
-            .content-grid {{
+        @media (max-width: 1024px) {
+            .content-grid {
                 grid-template-columns: repeat(2, 1fr);
-            }}
-        }}
+            }
+        }
 
-        @media (max-width: 768px) {{
-            .container {{
+        @media (max-width: 768px) {
+            .container {
                 padding: 16px;
-            }}
+            }
 
-            h1 {{
+            h1 {
                 font-size: 24px;
-            }}
+            }
 
-            .stats-grid {{
+            .stats-grid {
                 grid-template-columns: repeat(3, 1fr);
-            }}
+            }
 
-            .stat-value {{
+            .stat-value {
                 font-size: 32px;
-            }}
+            }
 
-            .content-grid {{
+            .content-grid {
                 grid-template-columns: 1fr;
-            }}
+            }
 
-            .toolbar {{
+            .toolbar {
                 flex-direction: column;
                 align-items: stretch;
-            }}
+            }
 
-            .search-box {{
+            .search-box {
                 max-width: none;
-            }}
+            }
 
-            button {{
+            button {
                 width: 100%;
-            }}}}
-        }}
+            }}
+        }
 
-        @media (max-width: 480px) {{
-            .stats-grid {{
+        @media (max-width: 480px) {
+            .stats-grid {
                 grid-template-columns: 1fr;
-            }}
+            }
 
-            .stat-value {{
+            .stat-value {
                 font-size: 28px;
-            }}
+            }
 
-            .message-item {{
+            .message-item {
                 padding: 12px 16px;
-            }}
+            }
 
-            .modal {{
+            .modal {
                 margin: 0;
                 border-radius: 0;
-            }}}}
-        }}
+            }}
+        }
     </style>
 </head>
 <body>
@@ -750,11 +750,11 @@ DASHBOARD_HTML = """
     </div>
 
     <script>
-        var INBOX_FOLDER = '{{inbox_folder}}';
-        var DRAFTS_FOLDER = '{{drafts_folder}}';
-        var SENT_FOLDER = '{{sent_folder}}';
+        var INBOX_FOLDER = '{inbox_folder}';
+        var DRAFTS_FOLDER = '{drafts_folder}';
+        var SENT_FOLDER = '{sent_folder}';
 
-        function esc(s) {{
+        function esc(s) {
             if (!s) return '';
             return String(s)
                 .replace(/&/g, '&amp;')
@@ -762,27 +762,27 @@ DASHBOARD_HTML = """
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
-        }}
+        }
 
-        function formatDate(dateString) {{
+        function formatDate(dateString) {
             if (!dateString) return '-';
-            try {{
+            try {
                 var date = new Date(dateString);
-                return date.toLocaleString('de-DE', {{
+                return date.toLocaleString('de-DE', {
                     day: '2-digit',
                     month: '2-digit',
                     year: 'numeric',
                     hour: '2-digit',
                     minute: '2-digit'
-                }});
-            }} catch (e) {{
+                });
+            } catch (e) {
                 return dateString;
-            }}
-        }}
+            }
+        }
 
-        function formatRelativeTime(dateString) {{
+        function formatRelativeTime(dateString) {
             if (!dateString) return '';
-            try {{
+            try {
                 var date = new Date(dateString);
                 var now = new Date();
                 var diff = now - date;
@@ -795,25 +795,25 @@ DASHBOARD_HTML = """
                 if (hours > 0) return 'vor ' + hours + ' Std.';
                 if (minutes > 0) return 'vor ' + minutes + ' Min.';
                 return 'gerade eben';
-            }} catch (e) {{
+            } catch (e) {
                 return '';
-            }}
-        }}
+            }
+        }
 
-        function truncate(text, length) {{
+        function truncate(text, length) {
             if (!text || text.length <= length) return text;
             return text.substring(0, length) + '...';
-        }}
+        }
 
-        function showLoading(elementId, show) {{
+        function showLoading(elementId, show) {
             var loadingEl = document.getElementById(elementId + 'Loading');
             var textEl = document.getElementById(elementId + 'Text');
             if (loadingEl) loadingEl.style.display = show ? 'inline-block' : 'none';
             if (textEl) textEl.style.display = show ? 'none' : 'inline';
-        }}
+        }
 
-        async function loadSummary() {{
-            try {{
+        async function loadSummary() {
+            try {
                 var response = await fetch('/dashboard/summary');
                 if (!response.ok) throw new Error('Failed to load summary');
                 var data = await response.json();
@@ -823,55 +823,55 @@ DASHBOARD_HTML = """
                 document.getElementById('sentCount').textContent = data.sent_count || 0;
                 
                 updatePanelCounts();
-            }} catch (error) {{
+            } catch (error) {
                 console.error('Error loading summary:', error);
                 showError('inboxList', 'Fehler beim Laden der Zusammenfassung');
-            }}
-        }}
+            }
+        }
 
-        async function loadFolder(folder, targetElementId, showLoadingState) {{
+        async function loadFolder(folder, targetElementId, showLoadingState) {
             var email = document.getElementById('emailFilter').value || null;
             var listEl = document.getElementById(targetElementId);
             
-            if (showLoadingState) {{
+            if (showLoadingState) {
                 listEl.innerHTML = '<div class="loading-overlay"><span class="loading"></span><span style="margin-left:12px">Lade Nachrichten...</span></div>';
-            }}
+            }
             
-            try {{
-                var response = await fetch('/emails/messages', {{
+            try {
+                var response = await fetch('/emails/messages', {
                     method: 'POST',
-                    headers: {{
+                    headers: {
                         'Content-Type': 'application/json'
-                    }},
-                    body: JSON.stringify({{
+                    },
+                    body: JSON.stringify({
                         folder: folder,
                         email_address: email,
                         limit: 50
-                    }})
-                }});
+                    })
+                });
                 
                 if (!response.ok) throw new Error('Failed to load messages');
                 
                 var data = await response.json();
                 
-                if (!data.items || data.items.length === 0) {{
+                if (!data.items || data.items.length === 0) {
                     listEl.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📭</div><div>Keine Nachrichten gefunden</div></div>';
                     return;
-                }}
+                }
                 
-                listEl.innerHTML = data.items.map(function(item) {{
+                listEl.innerHTML = data.items.map(function(item) {
                     return createMessageItemHtml(item, folder);
-                }}).join('');
+                }).join('');
                 
                 updatePanelCounts();
                 
-            }} catch (error) {{
+            } catch (error) {
                 console.error('Error loading folder:', folder, error);
                 showError(targetElementId, 'Fehler beim Laden der Nachrichten');
-            }}
-        }}
+            }
+        }
 
-        function createMessageItemHtml(item, folder) {{
+        function createMessageItemHtml(item, folder) {
             var isUnread = !item.received_at;
             var folderClass = 'badge-' + folder.toLowerCase();
             
@@ -887,9 +887,9 @@ DASHBOARD_HTML = """
                 '</div>' +
                 '<div class="message-snippet">' + esc(truncate(item.snippet || item.body_text || '', 150)) + '</div>' +
                 '</div>';
-        }}
+        }
 
-        function showMessageDetail(item) {{
+        function showMessageDetail(item) {
             var modal = document.getElementById('messageModal');
             var modalTitle = document.getElementById('modalTitle');
             var modalContent = document.getElementById('modalContent');
@@ -925,51 +925,51 @@ DASHBOARD_HTML = """
                 '<div class="message-body">' + esc(item.body_text || '(kein Text)') + '</div>' +
                 '</div>';
             
-            if (item.snippet) {{
+            if (item.snippet) {
                 html += '<div class="detail-section">' +
                     '<div class="detail-label">Vorschau</div>' +
                     '<div class="detail-value">' + esc(item.snippet) + '</div>' +
                     '</div>';
-            }}
+            }
             
             modalContent.innerHTML = html;
             modal.classList.add('active');
-        }}
+        }
 
-        function closeModal() {{
+        function closeModal() {
             document.getElementById('messageModal').classList.remove('active');
-        }}
+        }
 
-        async function loadAllFolders() {{
+        async function loadAllFolders() {
             showLoading('refresh', true);
             
-            try {{
+            try {
                 await Promise.all([
                     loadFolder(INBOX_FOLDER, 'inboxList', false),
                     loadFolder(DRAFTS_FOLDER, 'draftsList', false),
                     loadFolder(SENT_FOLDER, 'sentList', false)
                 ]);
                 await loadSummary();
-            }} catch (error) {{
+            } catch (error) {
                 console.error('Error loading all folders:', error);
-            }} finally {{
+            } finally {
                 showLoading('refresh', false);
-            }}
-        }}
+            }
+        }
 
-        function clearFilter() {{
+        function clearFilter() {
             document.getElementById('emailFilter').value = '';
             loadAllFolders();
-        }}
+        }
 
-        function showError(elementId, message) {{
+        function showError(elementId, message) {
             var el = document.getElementById(elementId);
-            if (el) {{
+            if (el) {
                 el.innerHTML = '<div class="error-message">' + esc(message) + '</div>';
-            }}
-        }}
+            }
+        }
 
-        function updatePanelCounts() {{
+        function updatePanelCounts() {
             var inboxCount = document.querySelectorAll('#inboxList .message-item').length;
             var draftsCount = document.querySelectorAll('#draftsList .message-item').length;
             var sentCount = document.querySelectorAll('#sentList .message-item').length;
@@ -981,19 +981,19 @@ DASHBOARD_HTML = """
             if (inboxBadge) inboxBadge.textContent = INBOX_FOLDER + ' (' + inboxCount + ')';
             if (draftsBadge) draftsBadge.textContent = DRAFTS_FOLDER + ' (' + draftsCount + ')';
             if (sentBadge) sentBadge.textContent = SENT_FOLDER + ' (' + sentCount + ')';
-        }}
+        }
 
-        document.getElementById('messageModal').addEventListener('click', function(e) {{
-            if (e.target === this) {{
+        document.getElementById('messageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
                 closeModal();
-            }}
-        }});
+            }
+        });
 
-        document.addEventListener('keydown', function(e) {{
-            if (e.key === 'Escape') {{
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
                 closeModal();
-            }}
-        }});
+            }
+        });
 
         loadAllFolders();
         setInterval(loadSummary, 60000);
@@ -1005,15 +1005,12 @@ DASHBOARD_HTML = """
 
 @app.get('/dashboard', response_class=HTMLResponse)
 def dashboard() -> str:
-    inbox_folder = settings.IMAP_INBOX_FOLDER
-    drafts_folder = settings.IMAP_DRAFTS_FOLDER
-    sent_folder = settings.IMAP_SENT_FOLDER
+    inbox_folder = esc(settings.IMAP_INBOX_FOLDER)
+    drafts_folder = esc(settings.IMAP_DRAFTS_FOLDER)
+    sent_folder = esc(settings.IMAP_SENT_FOLDER)
     
-    return DASHBOARD_HTML.format(
-        inbox_folder=esc(inbox_folder),
-        drafts_folder=esc(drafts_folder),
-        sent_folder=esc(sent_folder)
-    )
+    html = DASHBOARD_HTML.replace('{inbox_folder}', inbox_folder).replace('{drafts_folder}', drafts_folder).replace('{sent_folder}', sent_folder)
+    return html
 
 
 def esc(s):
