@@ -874,8 +874,10 @@ DASHBOARD_HTML = """
         function createMessageItemHtml(item, folder) {
             var isUnread = !item.received_at;
             var folderClass = 'badge-' + folder.toLowerCase();
+            var itemId = 'msg-' + Math.random().toString(36).substr(2, 9);
+            var itemData = JSON.stringify(item);
             
-            return '<div class="message-item ' + (isUnread ? 'unread' : '') + '" onclick=\'showMessageDetail(' + JSON.stringify(item).replace(/"/g, '&quot;') + ')\'>' +
+            return '<div class="message-item ' + (isUnread ? 'unread' : '') + '" data-item="' + itemData.replace(/"/g, '&quot;') + '" onclick="showMessageDetailJSON('' + itemId + '')">' +
                 '<div class="message-header">' +
                 '<span class="message-subject">' + esc(item.subject || '(kein Betreff)') + '</span>' +
                 '<span class="message-date">' + formatDate(item.received_at) + '</span>' +
@@ -889,7 +891,11 @@ DASHBOARD_HTML = """
                 '</div>';
         }
 
-        function showMessageDetail(item) {
+        function showMessageDetailJSON(itemId) {
+            var element = document.querySelector('[data-item="' + itemId + '"]');
+            if (!element) return;
+            var itemData = element.getAttribute('data-item');
+            var item = JSON.parse(itemData);
             var modal = document.getElementById('messageModal');
             var modalTitle = document.getElementById('modalTitle');
             var modalContent = document.getElementById('modalContent');
@@ -931,6 +937,10 @@ DASHBOARD_HTML = """
                     '<div class="detail-value">' + esc(item.snippet) + '</div>' +
                     '</div>';
             }
+            
+            modalContent.innerHTML = html;
+            modal.classList.add('active');
+        }
             
             modalContent.innerHTML = html;
             modal.classList.add('active');
