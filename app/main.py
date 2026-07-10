@@ -877,7 +877,7 @@ DASHBOARD_HTML = """
             var itemId = 'msg-' + Math.random().toString(36).substr(2, 9);
             var itemData = JSON.stringify(item);
             
-            return '<div class="message-item ' + (isUnread ? 'unread' : '') + '" data-item="' + itemData.replace(/"/g, '&quot;') + '" onclick="showMessageDetailJSON(\' + itemId + \')">' +
+            return '<div class="message-item ' + (isUnread ? 'unread' : '') + '" data-item="' + itemData.replace(/"/g, '&quot;') + '" onclick='showMessageDetailJSON(" + itemId + ")'>' +
                 '<div class="message-header">' +
                 '<span class="message-subject">' + esc(item.subject || '(kein Betreff)') + '</span>' +
                 '<span class="message-date">' + formatDate(item.received_at) + '</span>' +
@@ -942,9 +942,6 @@ DASHBOARD_HTML = """
             modal.classList.add('active');
         }
             
-            modalContent.innerHTML = html;
-            modal.classList.add('active');
-        }
 
         function closeModal() {
             document.getElementById('messageModal').classList.remove('active');
