@@ -171,6 +171,8 @@ DASHBOARD_HTML = """
         .button-primary { background: var(--accent); color: #05040a; }
 
         .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(48px, 5vw, 72px); }
+        .panel[data-folder-kind="drafts"] .message-item { border-left-color: #ffd36e; }
+        .panel[data-folder-kind="drafts"] .folder-badge { background: #4a3600; border-color: #ffd36e; }
         .panel { min-width: 0; }
         .panel-header { border-bottom: 3px solid var(--line); padding-bottom: 42px; margin-bottom: 38px; }
         .folder-badge { display: inline-block; margin-bottom: 14px; padding: 7px 16px; background: var(--accent-deep); border: 1px solid var(--accent); color: var(--text); font-size: clamp(14px, 1.2vw, 22px); line-height: 1; text-transform: uppercase; }
@@ -237,10 +239,10 @@ DASHBOARD_HTML = """
             <button id="clearButton" type="button">Filter zurücksetzen</button>
         </section>
 
-        <section class="content-grid">
-            <article class="panel"><div class="panel-header"><span class="folder-badge" id="inboxBadge">{inbox_folder}</span><span class="panel-title">Inbox</span></div><div class="message-list" id="inboxList"></div></article>
-            <article class="panel"><div class="panel-header"><span class="folder-badge" id="draftsBadge">{drafts_folder}</span><span class="panel-title">Entwürfe</span></div><div class="message-list" id="draftsList"></div></article>
-            <article class="panel"><div class="panel-header"><span class="folder-badge" id="sentBadge">{sent_folder}</span><span class="panel-title">Gesendet</span></div><div class="message-list" id="sentList"></div></article>
+        <section class="content-grid" aria-label="Nachrichten nach Ordnern">
+            <article class="panel" data-folder-kind="inbox"><div class="panel-header"><span class="folder-badge" id="inboxBadge">{inbox_folder}</span><span class="panel-title">Inbox</span></div><div class="message-list" id="inboxList"></div></article>
+            <article class="panel" data-folder-kind="drafts"><div class="panel-header"><span class="folder-badge" id="draftsBadge">{drafts_folder}</span><span class="panel-title">Entwürfe</span></div><div class="message-list" id="draftsList"></div></article>
+            <article class="panel" data-folder-kind="sent"><div class="panel-header"><span class="folder-badge" id="sentBadge">{sent_folder}</span><span class="panel-title">Gesendet</span></div><div class="message-list" id="sentList"></div></article>
         </section>
     </main>
 
@@ -253,6 +255,11 @@ DASHBOARD_HTML = """
         var DRAFTS_FOLDER = '{drafts_folder}';
         var SENT_FOLDER = '{sent_folder}';
         var messageStore = new Map();
+        var folderPanels = [
+            { folder: INBOX_FOLDER, listId: 'inboxList', badgeId: 'inboxBadge', label: 'Inbox' },
+            { folder: DRAFTS_FOLDER, listId: 'draftsList', badgeId: 'draftsBadge', label: 'Entwürfe' },
+            { folder: SENT_FOLDER, listId: 'sentList', badgeId: 'sentBadge', label: 'Gesendet' }
+        ];
 
         function esc(value) {
             if (value === null || value === undefined) return '';
@@ -290,7 +297,9 @@ DASHBOARD_HTML = """
             document.getElementById('lastUpdated').textContent = '↪ Aktualisiert: ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }
 
-        async function loadFolder(folder, targetElementId) {
+        async function loadFolder(panel) {
+            var folder = panel.folder;
+            var targetElementId = panel.listId;
             var listEl = document.getElementById(targetElementId);
             var email = document.getElementById('emailFilter').value.trim() || null;
             listEl.innerHTML = loadingMarkup();
@@ -304,7 +313,7 @@ DASHBOARD_HTML = """
                 if (!response.ok) throw new Error('Nachrichten konnten nicht geladen werden');
                 var data = await response.json();
                 listEl.innerHTML = data.items && data.items.length ? data.items.map(function(item, index) { return createMessageItemHtml(item, folder, targetElementId + '-' + index); }).join('') : emptyMarkup();
-                updatePanelCounts();
+                updatePanelCount(panel, data.returned || 0);
             } catch (error) {
                 console.error('Error loading folder:', folder, error);
                 listEl.innerHTML = '<div class="error-message">⚠️ Fehler beim Laden der Nachrichten<br>Die Nachrichten konnten nicht geladen werden. Bitte versuchen Sie es erneut.</div>';
@@ -345,7 +354,8 @@ DASHBOARD_HTML = """
         async function loadAllFolders() {
             setRefreshState(true);
             try {
-                await Promise.all([loadFolder(INBOX_FOLDER, 'inboxList'), loadFolder(DRAFTS_FOLDER, 'draftsList'), loadFolder(SENT_FOLDER, 'sentList')]);
+                messageStore.clear();
+                await Promise.all(folderPanels.map(loadFolder));
                 await loadSummary();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -354,10 +364,8 @@ DASHBOARD_HTML = """
             }
         }
 
-        function updatePanelCounts() {
-            document.getElementById('inboxBadge').textContent = INBOX_FOLDER + ' (' + document.querySelectorAll('#inboxList .message-item').length + ')';
-            document.getElementById('draftsBadge').textContent = DRAFTS_FOLDER + ' (' + document.querySelectorAll('#draftsList .message-item').length + ')';
-            document.getElementById('sentBadge').textContent = SENT_FOLDER + ' (' + document.querySelectorAll('#sentList .message-item').length + ')';
+        function updatePanelCount(panel, count) {
+            document.getElementById(panel.badgeId).textContent = panel.folder + ' (' + count + ')';
         }
 
         document.getElementById('refreshButton').addEventListener('click', loadAllFolders);
