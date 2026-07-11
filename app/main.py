@@ -170,10 +170,10 @@ DASHBOARD_HTML = """
         button:disabled { opacity: .55; cursor: wait; }
         .button-primary { background: var(--accent); color: #05040a; }
 
-        .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(48px, 5vw, 72px); }
+        .content-grid { display: grid; grid-template-columns: repeat(3, minmax(320px, 1fr)); gap: clamp(32px, 4vw, 72px); overflow-x: auto; padding-bottom: 18px; }
         .panel[data-folder-kind="drafts"] .message-item { border-left-color: #ffd36e; }
         .panel[data-folder-kind="drafts"] .folder-badge { background: #4a3600; border-color: #ffd36e; }
-        .panel { min-width: 0; }
+        .panel { min-width: 320px; }
         .panel-header { border-bottom: 3px solid var(--line); padding-bottom: 42px; margin-bottom: 38px; }
         .folder-badge { display: inline-block; margin-bottom: 14px; padding: 7px 16px; background: var(--accent-deep); border: 1px solid var(--accent); color: var(--text); font-size: clamp(14px, 1.2vw, 22px); line-height: 1; text-transform: uppercase; }
         .panel-title { display: block; color: var(--text); font-size: clamp(28px, 2.2vw, 42px); font-weight: 500; line-height: 1.1; }
@@ -205,7 +205,8 @@ DASHBOARD_HTML = """
 
         @media (max-width: 1100px) {
             .status-pill { position: static; margin-top: 28px; display: block; }
-            .content-grid { grid-template-columns: 1fr; }
+            .content-grid { grid-template-columns: repeat(3, minmax(300px, 1fr)); }
+            .panel { min-width: 300px; }
         }
         @media (max-width: 760px) {
             .container { padding: 34px 22px 50px; }

@@ -17,6 +17,8 @@ def test_dashboard_renders_drafts_middle_column_and_modal() -> None:
     sent_position = html.index('id="sentList"')
     assert inbox_position < drafts_position < sent_position
     assert 'data-folder-kind="drafts"' in html
+    assert 'grid-template-columns: repeat(3, minmax(320px, 1fr))' in html
+    assert '.content-grid { grid-template-columns: 1fr; }' not in html
     assert 'var folderPanels = [' in html
     assert "listId: 'draftsList'" in html
     assert 'id="messageModal"' in html
