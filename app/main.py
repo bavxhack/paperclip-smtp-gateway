@@ -170,24 +170,25 @@ DASHBOARD_HTML = """
         button:disabled { opacity: .55; cursor: wait; }
         .button-primary { background: var(--accent); color: #05040a; }
 
-        .content-grid { display: grid; grid-template-columns: repeat(3, minmax(320px, 1fr)); gap: clamp(32px, 4vw, 72px); overflow-x: auto; padding-bottom: 18px; }
+        .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
         .panel[data-folder-kind="drafts"] .message-item { border-left-color: #ffd36e; }
         .panel[data-folder-kind="drafts"] .folder-badge { background: #4a3600; border-color: #ffd36e; }
-        .panel { min-width: 320px; }
+        .panel { min-width: 0; overflow: hidden; }
         .panel-header { border-bottom: 3px solid var(--line); padding-bottom: 42px; margin-bottom: 38px; }
         .folder-badge { display: inline-block; margin-bottom: 14px; padding: 7px 16px; background: var(--accent-deep); border: 1px solid var(--accent); color: var(--text); font-size: clamp(14px, 1.2vw, 22px); line-height: 1; text-transform: uppercase; }
         .panel-title { display: block; color: var(--text); font-size: clamp(28px, 2.2vw, 42px); font-weight: 500; line-height: 1.1; }
         .message-list { display: grid; gap: 30px; }
-        .message-item { display: block; width: 100%; text-align: left; border: 3px solid #697071; border-left: 11px solid var(--accent); border-radius: 2px; background: transparent; color: inherit; padding: 32px 32px 28px; cursor: pointer; }
+        .message-item { display: block; width: 100%; min-width: 0; overflow: hidden; text-align: left; border: 3px solid #697071; border-left: 11px solid var(--accent); border-radius: 2px; background: transparent; color: inherit; padding: clamp(20px, 2vw, 32px); cursor: pointer; }
         .message-item:hover { border-color: var(--accent); }
         .message-header { margin-bottom: 14px; font-size: clamp(20px, 1.55vw, 30px); line-height: 1.35; }
         .message-subject { font-weight: 750; color: #dedfdd; }
         .message-date { color: var(--muted); font-weight: 400; }
-        .message-meta, .message-snippet { color: var(--muted); font-size: clamp(18px, 1.45vw, 28px); line-height: 1.55; }
+        .message-header, .message-meta, .message-snippet { overflow-wrap: anywhere; word-break: break-word; }
+        .message-meta, .message-snippet { color: var(--muted); font-size: clamp(16px, 1.25vw, 24px); line-height: 1.5; }
         .message-snippet { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         .message-meta .to-line { display: none; }
         .empty-state, .error-message, .loading-overlay { color: var(--muted); font-size: clamp(18px, 1.35vw, 26px); line-height: 1.45; padding: 12px 0; }
-        .error-message { background: var(--warn-bg); color: var(--warn-text); padding: 32px; }
+        .error-message { background: var(--warn-bg); color: var(--warn-text); padding: clamp(20px, 2vw, 32px); overflow-wrap: anywhere; }
         .loading { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s linear infinite; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -205,8 +206,7 @@ DASHBOARD_HTML = """
 
         @media (max-width: 1100px) {
             .status-pill { position: static; margin-top: 28px; display: block; }
-            .content-grid { grid-template-columns: repeat(3, minmax(300px, 1fr)); }
-            .panel { min-width: 300px; }
+            .content-grid { grid-template-columns: 1fr; }
         }
         @media (max-width: 760px) {
             .container { padding: 34px 22px 50px; }
@@ -241,9 +241,9 @@ DASHBOARD_HTML = """
         </section>
 
         <section class="content-grid" aria-label="Nachrichten nach Ordnern">
-            <article class="panel" data-folder-kind="inbox"><div class="panel-header"><span class="folder-badge" id="inboxBadge">{inbox_folder}</span><span class="panel-title">Inbox</span></div><div class="message-list" id="inboxList"></div></article>
-            <article class="panel" data-folder-kind="drafts"><div class="panel-header"><span class="folder-badge" id="draftsBadge">{drafts_folder}</span><span class="panel-title">Entwürfe</span></div><div class="message-list" id="draftsList"></div></article>
-            <article class="panel" data-folder-kind="sent"><div class="panel-header"><span class="folder-badge" id="sentBadge">{sent_folder}</span><span class="panel-title">Gesendet</span></div><div class="message-list" id="sentList"></div></article>
+            <article class="panel" data-folder-kind="inbox"><div class="panel-header"><span class="folder-badge" id="inboxBadge">Inbox</span><span class="panel-title">Inbox</span></div><div class="message-list" id="inboxList"></div></article>
+            <article class="panel" data-folder-kind="drafts"><div class="panel-header"><span class="folder-badge" id="draftsBadge">Entwürfe</span><span class="panel-title">Entwürfe</span></div><div class="message-list" id="draftsList"></div></article>
+            <article class="panel" data-folder-kind="sent"><div class="panel-header"><span class="folder-badge" id="sentBadge">Gesendet</span><span class="panel-title">Gesendet</span></div><div class="message-list" id="sentList"></div></article>
         </section>
     </main>
 
@@ -366,7 +366,7 @@ DASHBOARD_HTML = """
         }
 
         function updatePanelCount(panel, count) {
-            document.getElementById(panel.badgeId).textContent = panel.folder + ' (' + count + ')';
+            document.getElementById(panel.badgeId).textContent = panel.label + ' (' + count + ')';
         }
 
         document.getElementById('refreshButton').addEventListener('click', loadAllFolders);
