@@ -16,9 +16,7 @@ class MailboxReader:
 
     def fetch_messages(self, query: EmailMessagesQuery) -> tuple[list[EmailMessageItem], int]:
         with self.imap_client.connect() as client:
-            status, _ = client.select(query.folder)
-            if status != 'OK':
-                raise RuntimeError(f'Could not select folder: {query.folder}')
+            selected_folder = self._select_folder(client, query.folder)
 
             status, data = client.search(None, 'ALL')
             if status != 'OK':
@@ -46,7 +44,7 @@ class MailboxReader:
 
                 item = EmailMessageItem(
                     uid=mail_id.decode('utf-8', errors='ignore'),
-                    folder=query.folder,
+                    folder=selected_folder,
                     message_id=message_id,
                     from_email=from_email,
                     to_email=to_email,
@@ -61,6 +59,52 @@ class MailboxReader:
                 items.append(item)
 
         return items, total
+
+    def _select_folder(self, client, folder: str) -> str:  # type: ignore[no-untyped-def]
+        status, _ = client.select(folder)
+        if status == 'OK':
+            return folder
+
+        fallback_folder = self._find_matching_folder(folder)
+        if fallback_folder and fallback_folder != folder:
+            status, _ = client.select(fallback_folder)
+            if status == 'OK':
+                return fallback_folder
+
+        raise RuntimeError(f'Could not select folder: {folder}')
+
+    def _find_matching_folder(self, folder: str) -> str | None:
+        try:
+            folders = self.imap_client.list_folders()
+        except Exception:
+            return None
+
+        normalized_folder = self._normalize_folder_name(folder)
+        for candidate in folders:
+            if self._normalize_folder_name(candidate) == normalized_folder:
+                return candidate
+
+        wanted_terms = self._folder_terms(normalized_folder)
+        for candidate in folders:
+            normalized_candidate = self._normalize_folder_name(candidate)
+            if any(term in normalized_candidate for term in wanted_terms):
+                return candidate
+
+        return None
+
+    @staticmethod
+    def _normalize_folder_name(folder: str) -> str:
+        return folder.casefold().replace(' ', '').replace('-', '').replace('_', '')
+
+    @staticmethod
+    def _folder_terms(normalized_folder: str) -> tuple[str, ...]:
+        if 'draft' in normalized_folder or 'entwurf' in normalized_folder:
+            return ('draft', 'drafts', 'entwurf', 'entwuerf')
+        if 'sent' in normalized_folder or 'gesendet' in normalized_folder:
+            return ('sent', 'sentmessages', 'gesendet')
+        if 'inbox' in normalized_folder or 'eingang' in normalized_folder:
+            return ('inbox', 'eingang')
+        return (normalized_folder,)
 
     @staticmethod
     def _extract_text(msg: email.message.Message) -> str:
