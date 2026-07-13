@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 
 from fastapi import Body, FastAPI, HTTPException
@@ -252,9 +253,9 @@ DASHBOARD_HTML = """
     </div>
 
     <script>
-        var INBOX_FOLDER = '{inbox_folder}';
-        var DRAFTS_FOLDER = '{drafts_folder}';
-        var SENT_FOLDER = '{sent_folder}';
+        var INBOX_FOLDER = {inbox_folder_json};
+        var DRAFTS_FOLDER = {drafts_folder_json};
+        var SENT_FOLDER = {sent_folder_json};
         var messageStore = new Map();
         var folderPanels = [
             { folder: INBOX_FOLDER, listId: 'inboxList', badgeId: 'inboxBadge', label: 'Inbox' },
@@ -387,11 +388,14 @@ DASHBOARD_HTML = """
 
 @app.get('/dashboard', response_class=HTMLResponse)
 def dashboard() -> str:
-    inbox_folder = esc(settings.IMAP_INBOX_FOLDER)
-    drafts_folder = esc(settings.IMAP_DRAFTS_FOLDER)
-    sent_folder = esc(settings.IMAP_SENT_FOLDER)
-    
-    html = DASHBOARD_HTML.replace('{inbox_folder}', inbox_folder).replace('{drafts_folder}', drafts_folder).replace('{sent_folder}', sent_folder)
+    replacements = {
+        '{inbox_folder_json}': json.dumps(settings.IMAP_INBOX_FOLDER),
+        '{drafts_folder_json}': json.dumps(settings.IMAP_DRAFTS_FOLDER),
+        '{sent_folder_json}': json.dumps(settings.IMAP_SENT_FOLDER),
+    }
+    html = DASHBOARD_HTML
+    for placeholder, value in replacements.items():
+        html = html.replace(placeholder, value)
     return html
 
 
