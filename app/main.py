@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import logging
 
 from fastapi import Body, FastAPI, HTTPException
@@ -170,22 +171,25 @@ DASHBOARD_HTML = """
         button:disabled { opacity: .55; cursor: wait; }
         .button-primary { background: var(--accent); color: #05040a; }
 
-        .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(48px, 5vw, 72px); }
-        .panel { min-width: 0; }
+        .content-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(28px, 4vw, 56px); }
+        .panel[data-folder-kind="drafts"] .message-item { border-left-color: #ffd36e; }
+        .panel[data-folder-kind="drafts"] .folder-badge { background: #4a3600; border-color: #ffd36e; }
+        .panel { min-width: 0; overflow: hidden; }
         .panel-header { border-bottom: 3px solid var(--line); padding-bottom: 42px; margin-bottom: 38px; }
         .folder-badge { display: inline-block; margin-bottom: 14px; padding: 7px 16px; background: var(--accent-deep); border: 1px solid var(--accent); color: var(--text); font-size: clamp(14px, 1.2vw, 22px); line-height: 1; text-transform: uppercase; }
         .panel-title { display: block; color: var(--text); font-size: clamp(28px, 2.2vw, 42px); font-weight: 500; line-height: 1.1; }
         .message-list { display: grid; gap: 30px; }
-        .message-item { display: block; width: 100%; text-align: left; border: 3px solid #697071; border-left: 11px solid var(--accent); border-radius: 2px; background: transparent; color: inherit; padding: 32px 32px 28px; cursor: pointer; }
+        .message-item { display: block; width: 100%; min-width: 0; overflow: hidden; text-align: left; border: 3px solid #697071; border-left: 11px solid var(--accent); border-radius: 2px; background: transparent; color: inherit; padding: clamp(20px, 2vw, 32px); cursor: pointer; }
         .message-item:hover { border-color: var(--accent); }
         .message-header { margin-bottom: 14px; font-size: clamp(20px, 1.55vw, 30px); line-height: 1.35; }
         .message-subject { font-weight: 750; color: #dedfdd; }
         .message-date { color: var(--muted); font-weight: 400; }
-        .message-meta, .message-snippet { color: var(--muted); font-size: clamp(18px, 1.45vw, 28px); line-height: 1.55; }
+        .message-header, .message-meta, .message-snippet { overflow-wrap: anywhere; word-break: break-word; }
+        .message-meta, .message-snippet { color: var(--muted); font-size: clamp(16px, 1.25vw, 24px); line-height: 1.5; }
         .message-snippet { display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; overflow: hidden; }
         .message-meta .to-line { display: none; }
         .empty-state, .error-message, .loading-overlay { color: var(--muted); font-size: clamp(18px, 1.35vw, 26px); line-height: 1.45; padding: 12px 0; }
-        .error-message { background: var(--warn-bg); color: var(--warn-text); padding: 32px; }
+        .error-message { background: var(--warn-bg); color: var(--warn-text); padding: clamp(20px, 2vw, 32px); overflow-wrap: anywhere; }
         .loading { display: inline-block; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 50%; border-top-color: var(--accent); animation: spin 1s linear infinite; vertical-align: middle; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -237,10 +241,10 @@ DASHBOARD_HTML = """
             <button id="clearButton" type="button">Filter zurücksetzen</button>
         </section>
 
-        <section class="content-grid">
-            <article class="panel"><div class="panel-header"><span class="folder-badge" id="inboxBadge">{inbox_folder}</span><span class="panel-title">Inbox</span></div><div class="message-list" id="inboxList"></div></article>
-            <article class="panel"><div class="panel-header"><span class="folder-badge" id="draftsBadge">{drafts_folder}</span><span class="panel-title">Entwürfe</span></div><div class="message-list" id="draftsList"></div></article>
-            <article class="panel"><div class="panel-header"><span class="folder-badge" id="sentBadge">{sent_folder}</span><span class="panel-title">Gesendet</span></div><div class="message-list" id="sentList"></div></article>
+        <section class="content-grid" aria-label="Nachrichten nach Ordnern">
+            <article class="panel" data-folder-kind="inbox"><div class="panel-header"><span class="folder-badge" id="inboxBadge">Inbox</span><span class="panel-title">Inbox</span></div><div class="message-list" id="inboxList"></div></article>
+            <article class="panel" data-folder-kind="drafts"><div class="panel-header"><span class="folder-badge" id="draftsBadge">Entwürfe</span><span class="panel-title">Entwürfe</span></div><div class="message-list" id="draftsList"></div></article>
+            <article class="panel" data-folder-kind="sent"><div class="panel-header"><span class="folder-badge" id="sentBadge">Gesendet</span><span class="panel-title">Gesendet</span></div><div class="message-list" id="sentList"></div></article>
         </section>
     </main>
 
@@ -249,10 +253,15 @@ DASHBOARD_HTML = """
     </div>
 
     <script>
-        var INBOX_FOLDER = '{inbox_folder}';
-        var DRAFTS_FOLDER = '{drafts_folder}';
-        var SENT_FOLDER = '{sent_folder}';
+        var INBOX_FOLDER = {inbox_folder_json};
+        var DRAFTS_FOLDER = {drafts_folder_json};
+        var SENT_FOLDER = {sent_folder_json};
         var messageStore = new Map();
+        var folderPanels = [
+            { folder: INBOX_FOLDER, listId: 'inboxList', badgeId: 'inboxBadge', label: 'Inbox' },
+            { folder: DRAFTS_FOLDER, listId: 'draftsList', badgeId: 'draftsBadge', label: 'Entwürfe' },
+            { folder: SENT_FOLDER, listId: 'sentList', badgeId: 'sentBadge', label: 'Gesendet' }
+        ];
 
         function esc(value) {
             if (value === null || value === undefined) return '';
@@ -290,7 +299,9 @@ DASHBOARD_HTML = """
             document.getElementById('lastUpdated').textContent = '↪ Aktualisiert: ' + new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
         }
 
-        async function loadFolder(folder, targetElementId) {
+        async function loadFolder(panel) {
+            var folder = panel.folder;
+            var targetElementId = panel.listId;
             var listEl = document.getElementById(targetElementId);
             var email = document.getElementById('emailFilter').value.trim() || null;
             listEl.innerHTML = loadingMarkup();
@@ -304,7 +315,7 @@ DASHBOARD_HTML = """
                 if (!response.ok) throw new Error('Nachrichten konnten nicht geladen werden');
                 var data = await response.json();
                 listEl.innerHTML = data.items && data.items.length ? data.items.map(function(item, index) { return createMessageItemHtml(item, folder, targetElementId + '-' + index); }).join('') : emptyMarkup();
-                updatePanelCounts();
+                updatePanelCount(panel, data.returned || 0);
             } catch (error) {
                 console.error('Error loading folder:', folder, error);
                 listEl.innerHTML = '<div class="error-message">⚠️ Fehler beim Laden der Nachrichten<br>Die Nachrichten konnten nicht geladen werden. Bitte versuchen Sie es erneut.</div>';
@@ -345,7 +356,8 @@ DASHBOARD_HTML = """
         async function loadAllFolders() {
             setRefreshState(true);
             try {
-                await Promise.all([loadFolder(INBOX_FOLDER, 'inboxList'), loadFolder(DRAFTS_FOLDER, 'draftsList'), loadFolder(SENT_FOLDER, 'sentList')]);
+                messageStore.clear();
+                await Promise.all(folderPanels.map(loadFolder));
                 await loadSummary();
             } catch (error) {
                 console.error('Error loading dashboard:', error);
@@ -354,10 +366,8 @@ DASHBOARD_HTML = """
             }
         }
 
-        function updatePanelCounts() {
-            document.getElementById('inboxBadge').textContent = INBOX_FOLDER + ' (' + document.querySelectorAll('#inboxList .message-item').length + ')';
-            document.getElementById('draftsBadge').textContent = DRAFTS_FOLDER + ' (' + document.querySelectorAll('#draftsList .message-item').length + ')';
-            document.getElementById('sentBadge').textContent = SENT_FOLDER + ' (' + document.querySelectorAll('#sentList .message-item').length + ')';
+        function updatePanelCount(panel, count) {
+            document.getElementById(panel.badgeId).textContent = panel.label + ' (' + count + ')';
         }
 
         document.getElementById('refreshButton').addEventListener('click', loadAllFolders);
@@ -378,11 +388,14 @@ DASHBOARD_HTML = """
 
 @app.get('/dashboard', response_class=HTMLResponse)
 def dashboard() -> str:
-    inbox_folder = esc(settings.IMAP_INBOX_FOLDER)
-    drafts_folder = esc(settings.IMAP_DRAFTS_FOLDER)
-    sent_folder = esc(settings.IMAP_SENT_FOLDER)
-    
-    html = DASHBOARD_HTML.replace('{inbox_folder}', inbox_folder).replace('{drafts_folder}', drafts_folder).replace('{sent_folder}', sent_folder)
+    replacements = {
+        '{inbox_folder_json}': json.dumps(settings.IMAP_INBOX_FOLDER),
+        '{drafts_folder_json}': json.dumps(settings.IMAP_DRAFTS_FOLDER),
+        '{sent_folder_json}': json.dumps(settings.IMAP_SENT_FOLDER),
+    }
+    html = DASHBOARD_HTML
+    for placeholder, value in replacements.items():
+        html = html.replace(placeholder, value)
     return html
 
 
